@@ -2,8 +2,9 @@ module Game (
     startGame
   ) where
 
-import CodeBuilder
+--import CodeBuilder
 import Data.List (elemIndex)
+import System.IO
 
 data AnswerResult = AnswerResult {
   correctPositions :: Int,
@@ -25,8 +26,25 @@ checkGuess answer guess =
     go (x:xs) pos = mappend (go xs (pos + 1)) (checkLetter answer x pos)
   in go guess 0
 
+-- TODO: make this more generic, we should be able to handle many types
+-- TODO: handle the case where our guess is of a different length than our answer....
+playRound :: String -> Int -> IO ()
+playRound answer roundNum = do
+  putStr "Please enter a guess $ "
+  hFlush stdout
+  guess <- getLine
+  case checkGuess answer guess of
+    AnswerResult 4 0 -> putStrLn "You win!"
+    AnswerResult x y -> do
+      putStrLn "Not quite..."
+      putStr "Letters in correct positions: "
+      print x
+      putStr "Letters in incorrect positions: "
+      print y
+
 startGame :: IO ()
 startGame = do
-  code <- makeCode
-  putStrLn code
+  --code <- makeCode
+  playRound "ABCD" 0
+  return ()
 

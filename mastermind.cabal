@@ -14,13 +14,13 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
+  exposed-modules:     Game
                     ,  CodeBuilder
   build-depends:       base >= 4.7 && < 5
                     ,  random
   default-language:    Haskell2010
 
-executable mastermind-exe
+executable mastermind
   hs-source-dirs:      app
   main-is:             Main.hs
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall

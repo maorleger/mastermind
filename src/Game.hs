@@ -1,4 +1,6 @@
-module Lib where
+module Game (
+    startGame
+  ) where
 
 import CodeBuilder
 import Data.List (elemIndex)
@@ -22,4 +24,9 @@ checkGuess answer guess =
     go [] _ = AnswerResult 0 0
     go (x:xs) pos = mappend (go xs (pos + 1)) (checkLetter answer x pos)
   in go guess 0
+
+startGame :: IO ()
+startGame = do
+  code <- makeCode
+  putStrLn code
 

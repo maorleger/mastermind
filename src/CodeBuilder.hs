@@ -1,11 +1,12 @@
 module CodeBuilder (
     makeCode
+  , possibilities
   ) where
 
 import System.Random (randomRIO)
 
 possibilities :: [String]
-possibilities = [[a,b,c,d] | a <- "abcdef", b <- "abcdef", c <- "abcdef", d <- "abcdef"]
+possibilities = [[a,b,c,d] | a <- "ABCDEF", b <- "ABCDEF", c <- "ABCDEF", d <- "ABCDEF"]
 
 makeCode :: IO String
 makeCode = do

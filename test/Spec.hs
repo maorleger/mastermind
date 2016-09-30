@@ -22,23 +22,19 @@ monoidRightIdentity :: (Eq m, Monoid m) => m -> Bool
 monoidRightIdentity a = (mempty `mappend` a) == a
 
 genMastermind :: Gen String
-genMastermind = do
-  a <- arbitrary `suchThat` (\x -> (length x) == 4)
-  return a
+genMastermind = arbitrary `suchThat` (\x -> length x == 4)
 
 genUnique :: Gen String
-genUnique = do
-  a <- arbitrary `suchThat` (\x -> ((length x) == 4) && nub x == x)
-  return a
+genUnique = arbitrary `suchThat` (\x -> (length x == 4) && nub x == x)
 
 prop_guessesCorrectly :: Property
 prop_guessesCorrectly =
-  forAll (genMastermind)
+  forAll genMastermind
   (\x -> checkGuess x x == AnswerResult 4 0)
 
 prop_guessesIncorrectPos :: Property
 prop_guessesIncorrectPos =
-  forAll (genUnique)
+  forAll genUnique
   (\x -> checkGuess x (reverse x) == AnswerResult 0 4)
 
 main :: IO ()

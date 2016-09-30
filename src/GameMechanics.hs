@@ -57,6 +57,6 @@ playRound answer roundNum = do
     checkRound guess = 
       case checkGuess answer (map toUpper guess) of
         AnswerResult 4 0 -> endGame "You win!"
-        result -> putStr ("Not quite... " ++ show result) >> 
-          if roundNum > numRounds then endGame "You lose" else playRound answer (roundNum + 1)
+        result -> putStrLn ("Not quite... " ++ show result) >>
+          if roundNum > numRounds then endGame ("Sorry, the correct code was: " ++ answer) else playRound answer (roundNum + 1)
       

@@ -5,8 +5,11 @@ module CodeBuilder (
 
 import System.Random (randomRIO)
 
+pegs :: String
+pegs = "ABCDEF"
+
 possibilities :: [String]
-possibilities = [[a,b,c,d] | a <- "ABCDEF", b <- "ABCDEF", c <- "ABCDEF", d <- "ABCDEF"]
+possibilities = [[a,b,c,d] | a <- pegs, b <- pegs, c <- pegs, d <- pegs]
 
 makeCode :: IO String
 makeCode = do

@@ -20,13 +20,10 @@ instance Monoid AnswerResult where
 getIncorrectPositions :: Eq a => [a] -> [a] -> Int
 getIncorrectPositions _ [] = 0
 getIncorrectPositions [] _ = 0
-getIncorrectPositions answer (x':xs') = if x' `elem` answer then 1 + getIncorrectPositions (delete x' answer) xs' else 0 + getIncorrectPositions answer xs'
-  
-  -- let 
-  --   answer = map fst a
-  --   guess = map snd a
-  --   getIncorrectPositions' answer guess = 
-  -- in length $ intersect answer guess
+getIncorrectPositions answer (x':xs') = 
+  if x' `elem` answer 
+    then 1 + getIncorrectPositions (delete x' answer) xs'
+    else 0 + getIncorrectPositions answer xs'
 
 checkGuess :: Eq a => [a] -> [a] -> AnswerResult
 checkGuess answer guess = 

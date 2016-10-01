@@ -2,6 +2,8 @@ module Main where
 
 import Test.Hspec
 import Test.QuickCheck
+import Test.QuickCheck.Checkers
+import Test.QuickCheck.Classes
 import Data.Monoid
 import GameMechanics
 import Data.List (nub)
@@ -12,14 +14,7 @@ instance Arbitrary AnswerResult where
     b <- arbitrary
     return $ AnswerResult a b
 
-monoidAssoc :: (Eq m, Monoid m) => m -> m -> m -> Bool 
-monoidAssoc a b c = (a `mappend` (b `mappend` c)) == ((a `mappend` b) `mappend` c)
-
-monoidLeftIdentity :: (Eq m, Monoid m) => m -> Bool
-monoidLeftIdentity a = (a `mappend` mempty) == a
-
-monoidRightIdentity :: (Eq m, Monoid m) => m -> Bool
-monoidRightIdentity a = (mempty `mappend` a) == a
+instance EqProp AnswerResult where (=-=) = eq
 
 genGuess :: Gen String
 genGuess = arbitrary `suchThat` (\x -> length x == 4)
@@ -55,13 +50,12 @@ prop_scoreSumsCorrectly' =
 
 main :: IO ()
 main = do
-  quickCheck (monoidAssoc :: AnswerResult -> AnswerResult -> AnswerResult -> Bool)
-  quickCheck (monoidRightIdentity :: AnswerResult -> Bool)
-  quickCheck (monoidLeftIdentity :: AnswerResult -> Bool)
+  quickBatch (monoid AnswerResult)
   quickCheck prop_guessesCorrectly
   quickCheck prop_guessesIncorrectPos
   quickCheck prop_scoreSumsCorrectly
   quickCheck prop_scoreSumsCorrectly'
+
 
   hspec $ do
     describe "GameMechanics" $ do

@@ -45,6 +45,7 @@ checkGuess answer guess
       in
         Right (AnswerResult correctPositions incorrectPositions)
 
+
 playRound :: String -> Int -> IO ()
 playRound answer roundNum =
   let endGame msg = putStrLn msg >> exitSuccess

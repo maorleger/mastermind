@@ -10,7 +10,10 @@ numRounds = 7
 
 -- AnswerResult
 
-data AnswerResult = AnswerResult Int Int deriving (Eq)
+data AnswerResult = AnswerResult { 
+  blackPegs :: Int,
+  whitePegs :: Int
+} deriving (Eq)
 
 instance Show AnswerResult where
   show (AnswerResult x y) = "[" ++ show x ++ "," ++ show y ++ "]"

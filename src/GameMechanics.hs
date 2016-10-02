@@ -59,4 +59,5 @@ playRound answer roundNum =
         playRound answer roundNum
       Right (AnswerResult 4 0) -> endGame "You win!"
       Right result -> putStrLn ("Not quite... " ++ show result) >>
-        if roundNum > numRounds then endGame ("Sorry, the correct code was: " ++ answer) else playRound answer (roundNum + 1)
+        if roundNum >= numRounds then endGame ("Sorry, the correct code was: " ++ answer) else playRound answer (roundNum + 1)
+

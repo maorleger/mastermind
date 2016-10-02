@@ -32,18 +32,22 @@ incorrectPositionsCalc answer (x':xs') =
     else 0 + incorrectPositionsCalc answer xs'
 
 
-checkGuess :: Eq a => [a] -> [a] -> Either String AnswerResult
-checkGuess answer guess
-  | length answer /= length guess =
-      Left $ "Your guess needs to be " ++ (show . length $ answer) ++ " characters long"
-  | otherwise =
-      let
-        zippedGuesses = zip answer guess
-        correctPositions = foldr (\(x, y) acc -> if x == y then acc + 1 else acc) 0 zippedGuesses
-        leftOverPairs = filter (uncurry (/=)) zippedGuesses
-        incorrectPositions = incorrectPositionsCalc (map fst leftOverPairs) (map snd leftOverPairs)
-      in
-        Right (AnswerResult correctPositions incorrectPositions)
+validateGuess :: [a] -> [a] -> Either String [a]
+validateGuess answer guess =
+  if length answer /= length guess
+    then Left $ "Your guess needs to be " ++ (show . length $ answer) ++ " characters long"
+    else Right guess
+
+
+checkGuess :: Eq a => [a] -> [a] -> AnswerResult
+checkGuess answer guess =
+  let
+    zippedGuesses = zip answer guess
+    correctPositions = foldr (\(x, y) acc -> if x == y then acc + 1 else acc) 0 zippedGuesses
+    leftOverPairs = filter (uncurry (/=)) zippedGuesses
+    incorrectPositions = incorrectPositionsCalc (map fst leftOverPairs) (map snd leftOverPairs)
+  in
+    AnswerResult correctPositions incorrectPositions
 
 
 playRound :: String -> Int -> IO ()
@@ -52,12 +56,13 @@ playRound answer roundNum =
   in do
     putStr "Please enter a guess $ "
     hFlush stdout
-    guess <- getLine
-    case checkGuess answer (map toUpper guess) of
+    guess <- (fmap . fmap) toUpper getLine
+    case checkGuess answer <$> validateGuess answer guess of
       Left msg -> do
         putStrLn msg
         playRound answer roundNum
       Right (AnswerResult 4 0) -> endGame "You win!"
       Right result -> putStrLn ("Not quite... " ++ show result) >>
-        if roundNum >= numRounds then endGame ("Sorry, the correct code was: " ++ answer) else playRound answer (roundNum + 1)
-
+        if roundNum >= numRounds
+          then endGame ("Sorry, the correct code was: " ++ answer)
+          else playRound answer (roundNum + 1)

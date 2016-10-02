@@ -31,30 +31,22 @@ genUnique = arbitrary `suchThat` (\x -> (length x == 4) && nub x == x)
 prop_guessesCorrectly :: Property
 prop_guessesCorrectly =
   forAll genGuess
-  (\x -> checkGuess x x === Right (AnswerResult 4 0))
+  (\x -> checkGuess x x === AnswerResult 4 0)
 
 prop_guessesIncorrectPos :: Property
 prop_guessesIncorrectPos =
   forAll genUnique
-  (\x -> checkGuess x (reverse x) === Right (AnswerResult 0 4))
+  (\x -> checkGuess x (reverse x) === AnswerResult 0 4)
 
 prop_scoreSumsCorrectly :: Property
 prop_scoreSumsCorrectly =
   forAll genTuple
-  (\(answer, guess) ->
-    case checkGuess answer guess of
-      Left _ -> property False
-      Right (AnswerResult blackPegs whitePegs) -> property $ blackPegs + whitePegs <= 4
-  )
+  (\(answer, guess) -> (blackPegs (checkGuess answer guess)) + (whitePegs (checkGuess answer guess)) <= 4)
 
 prop_scoreSumsCorrectly' :: Property
 prop_scoreSumsCorrectly' =
   forAll genGuess
-  (\x ->
-    case checkGuess x (reverse x) of
-      Left _ -> property False
-      Right (AnswerResult blackPegs whitePegs) -> property $ blackPegs + whitePegs === 4
-  )
+  (\x -> (blackPegs (checkGuess x (reverse x))) + (whitePegs (checkGuess x (reverse x))) === 4)
 
 main :: IO ()
 main = do
@@ -71,13 +63,13 @@ main = do
         show (AnswerResult 4 0) `shouldBe` "[4,0]"
         show (AnswerResult 0 4) `shouldBe` "[0,4]"
       it "Correctly calculates incorrect positions" $ do
-        checkGuess "ABCD" "BCDA" `shouldBe` Right (AnswerResult 0 4)
+        checkGuess "ABCD" "BCDA" `shouldBe` AnswerResult 0 4
       it "Correctly handles repeated characters" $ do
-        checkGuess "AAAA" "AAAA" `shouldBe` Right (AnswerResult 4 0)
-        checkGuess "AABB" "ABAA" `shouldBe` Right (AnswerResult 1 2)
-        checkGuess "ABCF" "CBCA" `shouldBe` Right (AnswerResult 2 1)
+        checkGuess "AAAA" "AAAA" `shouldBe` AnswerResult 4 0
+        checkGuess "AABB" "ABAA" `shouldBe` AnswerResult 1 2
+        checkGuess "ABCF" "CBCA" `shouldBe` AnswerResult 2 1
       it "Correctly handles mismatched guess length" $ do
-        checkGuess "A" "AAAA" `shouldBe` Left "Your guess needs to be 1 characters long"
-        checkGuess "A" "AAAAA" `shouldBe` Left "Your guess needs to be 1 characters long"
-        checkGuess "AAAA" "A" `shouldBe` Left "Your guess needs to be 4 characters long"
-        checkGuess "AAAA" "AAAAA" `shouldBe` Left "Your guess needs to be 4 characters long"
+        validateGuess "A" "AAAA" `shouldBe` Left "Your guess needs to be 1 characters long"
+        validateGuess "A" "AAAAA" `shouldBe` Left "Your guess needs to be 1 characters long"
+        validateGuess "AAAA" "A" `shouldBe` Left "Your guess needs to be 4 characters long"
+        validateGuess "AAAA" "AAAAA" `shouldBe` Left "Your guess needs to be 4 characters long"

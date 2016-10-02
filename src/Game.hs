@@ -1,7 +1,7 @@
 module Game (startGame) where
 
 import CodeBuilder
-import GameMechanics  
+import GameMechanics
       
 startGame :: IO ()
 startGame = do

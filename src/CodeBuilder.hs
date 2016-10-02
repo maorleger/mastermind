@@ -1,6 +1,7 @@
 module CodeBuilder (
     makeCode
   , possibilities
+  , pegs
   ) where
 
 import System.Random (randomRIO)

@@ -4,11 +4,16 @@ import Data.List (delete)
 import System.IO
 import System.Exit (exitSuccess)
 import Data.Char (toUpper)
+import CodeBuilder (pegs)
 
 numRounds :: Int
 numRounds = 7
 
 -- AnswerResult
+
+type ValidationMessage = String
+type Guess = String
+type Answer = String
 
 data AnswerResult = AnswerResult { 
   blackPegs :: Int,
@@ -32,11 +37,11 @@ incorrectPositionsCalc answer (x':xs') =
     else 0 + incorrectPositionsCalc answer xs'
 
 
-validateGuess :: [a] -> [a] -> Either String [a]
-validateGuess answer guess =
-  if length answer /= length guess
-    then Left $ "Your guess needs to be " ++ (show . length $ answer) ++ " characters long"
-    else Right guess
+validateGuess :: Answer -> Guess -> Either ValidationMessage Guess
+validateGuess answer guess
+  | length answer /= length guess = Left $ "Your guess needs to be " ++ (show . length $ answer) ++ " characters long"
+  | any (\x -> not $ elem x pegs) guess = Left $ "Your guess can only include the following letters: [" ++ pegs ++ "]"
+  | otherwise = Right guess
 
 
 checkGuess :: Eq a => [a] -> [a] -> AnswerResult
@@ -50,7 +55,7 @@ checkGuess answer guess =
     AnswerResult correctPositions incorrectPositions
 
 
-playRound :: String -> Int -> IO ()
+playRound :: Answer -> Int -> IO ()
 playRound answer roundNum =
   let endGame msg = putStrLn msg >> exitSuccess
   in do

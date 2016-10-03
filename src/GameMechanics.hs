@@ -7,7 +7,7 @@ import Data.Char (toUpper)
 import CodeBuilder (pegs)
 
 numRounds :: Int
-numRounds = 7
+numRounds = 10
 
 -- AnswerResult
 

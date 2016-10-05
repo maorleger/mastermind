@@ -1,5 +1,8 @@
 module Main where
 
-import Game
+import qualified HumanSolverGame as Human
+import qualified HillClimbingSolverGame as HillClimbing
+
+
 main :: IO ()
-main = startGame
+main = HillClimbing.startGame

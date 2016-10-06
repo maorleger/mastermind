@@ -4,19 +4,17 @@ import CodeBuilder (makeCode)
 import GameMechanics
 import Data.Char (toUpper)
 import System.IO
-import System.Exit (exitSuccess)
 
 
 playRound :: Answer -> Int -> IO ()
 playRound answer roundNum =
-  let endGame msg = putStrLn msg >> exitSuccess
-  in do
+  do
     putStr "Please enter a guess $ "
     hFlush stdout
     guess <- (fmap . fmap) toUpper getLine
     case checkGuess answer <$> validateGuess answer guess of
-      Left msg -> do
-        putStrLn msg
+      Left msg ->
+        putStrLn msg >>
         playRound answer roundNum
       Right (AnswerResult 4 0) -> endGame "You win!"
       Right result -> putStrLn ("Not quite... " ++ show result) >>

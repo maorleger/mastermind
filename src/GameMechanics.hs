@@ -2,6 +2,7 @@ module GameMechanics where
 
 import Data.List (delete)
 import CodeBuilder (pegs)
+import System.Exit (exitSuccess)
 
 numRounds :: Int
 numRounds = 10
@@ -13,8 +14,8 @@ type Guess = String
 type Answer = String
 
 data AnswerResult = AnswerResult { 
-  blackPegs :: Int,
-  whitePegs :: Int
+  blackPegs :: Integer,
+  whitePegs :: Integer
 } deriving (Eq)
 
 instance Show AnswerResult where
@@ -24,8 +25,10 @@ instance Monoid AnswerResult where
   mempty = AnswerResult 0 0
   mappend (AnswerResult x y) (AnswerResult x' y') = AnswerResult (x + x') (y + y')
 
+endGame :: String -> IO ()
+endGame msg = putStrLn msg >> exitSuccess
 
-incorrectPositionsCalc :: Eq a => [a] -> [a] -> Int
+incorrectPositionsCalc :: Eq a => [a] -> [a] -> Integer
 incorrectPositionsCalc _ [] = 0
 incorrectPositionsCalc [] _ = 0
 incorrectPositionsCalc answer (x':xs') =

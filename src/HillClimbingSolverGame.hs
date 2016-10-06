@@ -5,8 +5,9 @@ import Data.Char (toUpper)
 import CodeBuilder
 import System.IO
 import System.Random
+import Control.Applicative
 
-readScore :: IO (Int, Int)
+readScore :: IO (Integer, Integer)
 readScore = readLn
 
 -- heuristic gives the distance to the goal by penalizing
@@ -43,20 +44,26 @@ genCode possibilities prevGuess (AnswerResult blackPegs whitePegs) =
     "ABCD"
 
 
+checkForGameOver :: (Integer, Integer) -> Integer -> IO ()
+checkForGameOver (4, 0) _ = endGame "I am the MACHINE!"
+checkForGameOver _ roundNum | (fromInteger roundNum) > numRounds = endGame "You lose"
+                            | otherwise = return ()
 
 -- TODO: 
 -- 1. Be able to read [1,2] and translate it to an AnswerResult
-playRound :: Guess -> AnswerResult -> Int -> IO ()
-playRound guess prevResult roundNum = do
-  putStrLn $ "My guess is: " ++ guess
-  putStrLn $ "How did I do?"
-  score <- readScore
-  print $ computeScore (AnswerResult (fst score) (snd score))
-  return ()
-
-
-
+playRound :: Guess -> AnswerResult -> [String] -> Integer -> IO ()
+playRound guess prevResult possibilities roundNum =
+  let makeNextGuress score = case uncurry AnswerResult $ score of 
+          AnswerResult x y ->
+            playRound guess prevResult possibilities (roundNum + 1)
+  in do
+    putStrLn ("My guess is: " ++ guess)
+    putStrLn "How did I do?"
+    score <- readScore
+    checkForGameOver score roundNum
+    makeNextGuress score
+  
 startGame :: IO ()
 startGame = do
-  playRound (genCode possibilities "" (AnswerResult 0 0)) (AnswerResult 0 0) 1
+  playRound (genCode possibilities "" (AnswerResult 0 0)) (AnswerResult 0 0) possibilities 1
   return ()

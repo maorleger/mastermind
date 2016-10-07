@@ -13,6 +13,9 @@ possibilities :: [String]
 possibilities = [[a,b,c,d] | a <- pegs, b <- pegs, c <- pegs, d <- pegs]
 
 makeCode :: IO String
-makeCode = do
+makeCode = makeCode' pegs
+
+makeCode' :: String -> IO String
+makeCode' pegs' = do
   randomIndex <- randomRIO (0, length possibilities - 1)
   return $ possibilities !! randomIndex

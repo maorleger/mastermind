@@ -25,6 +25,7 @@ instance Monoid AnswerResult where
   mempty = AnswerResult 0 0
   mappend (AnswerResult x y) (AnswerResult x' y') = AnswerResult (x + x') (y + y')
 
+
 endGame :: String -> IO ()
 endGame msg = putStrLn msg >> exitSuccess
 

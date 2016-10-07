@@ -14,8 +14,8 @@ type Guess = String
 type Answer = String
 
 data AnswerResult = AnswerResult { 
-  blackPegs :: Integer,
-  whitePegs :: Integer
+  blackPegs :: Int,
+  whitePegs :: Int
 } deriving (Eq)
 
 instance Show AnswerResult where
@@ -28,7 +28,7 @@ instance Monoid AnswerResult where
 endGame :: String -> IO ()
 endGame msg = putStrLn msg >> exitSuccess
 
-incorrectPositionsCalc :: Eq a => [a] -> [a] -> Integer
+incorrectPositionsCalc :: Eq a => [a] -> [a] -> Int
 incorrectPositionsCalc _ [] = 0
 incorrectPositionsCalc [] _ = 0
 incorrectPositionsCalc answer (x':xs') =

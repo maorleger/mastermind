@@ -7,12 +7,12 @@ import System.IO
 import System.Random
 import Control.Applicative
 
-readScore :: IO (Integer, Integer)
+readScore :: IO (Int, Int)
 readScore = readLn
 
 -- heuristic gives the distance to the goal by penalizing
 -- the pegs with the right colours but in wrong position.
-computeScore :: AnswerResult -> Integer
+computeScore :: AnswerResult -> Int
 computeScore (AnswerResult black white) = 
   case (black, white) of
     (0, 0) -> 0
@@ -44,20 +44,20 @@ genCode possibilities prevGuess (AnswerResult blackPegs whitePegs) =
     "ABCD"
 
 
-checkForGameOver :: (Integer, Integer) -> Integer -> IO ()
+checkForGameOver :: (Int, Int) -> Int -> IO ()
 checkForGameOver (4, 0) _ = endGame "I am the MACHINE!"
-checkForGameOver _ roundNum | (fromInteger roundNum) > numRounds = endGame "You lose"
+checkForGameOver _ roundNum | roundNum > numRounds = endGame "You lose"
                             | otherwise = return ()
 
 -- TODO: 
 -- 1. Be able to read [1,2] and translate it to an AnswerResult
-playRound :: Guess -> AnswerResult -> [String] -> Integer -> IO ()
+playRound :: Guess -> AnswerResult -> [String] -> Int -> IO ()
 playRound guess prevResult possibilities roundNum =
   let makeNextGuress score = case uncurry AnswerResult $ score of 
           AnswerResult x y ->
             playRound guess prevResult possibilities (roundNum + 1)
   in do
-    putStrLn ("My guess is: " ++ guess)
+    putStrLn $ "My guess is: " ++ guess
     putStrLn "How did I do?"
     score <- readScore
     checkForGameOver score roundNum

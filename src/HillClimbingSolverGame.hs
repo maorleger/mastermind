@@ -10,6 +10,8 @@ import Control.Applicative
 readScore :: IO (Int, Int)
 readScore = readLn
 
+data CFG = CFG Guess AnswerResult
+
 -- heuristic gives the distance to the goal by penalizing
 -- the pegs with the right colours but in wrong position.
 computeScore :: AnswerResult -> Int
@@ -31,17 +33,26 @@ computeScore (AnswerResult black white) =
     (4, 0) -> 13
 
 
+instance Ord AnswerResult where
+  compare result result' = compare (computeScore result) (computeScore result')
+
+
 randomPegsTokeep = undefined
 randomPegsToShift = undefined
 
 
-genCode :: [String] -> Guess -> AnswerResult -> Guess
-genCode possibilities prevGuess (AnswerResult blackPegs whitePegs) = 
+genCode :: [String] -> CFG -> Guess
+genCode possibilities (CFG guess (AnswerResult blackPegs whitePegs)) = 
   let 
     pegsToKeep = randomPegsTokeep "ABCDEF" blackPegs
     pegsToShift = randomPegsToShift pegsToKeep whitePegs
   in
     "ABCD"
+
+genInitialCFG :: IO CFG
+genInitialCFG = do
+  code <- makeCode 
+  return $ CFG code (AnswerResult 0 0)
 
 
 checkForGameOver :: (Int, Int) -> Int -> IO ()
@@ -49,21 +60,24 @@ checkForGameOver (4, 0) _ = endGame "I am the MACHINE!"
 checkForGameOver _ roundNum | roundNum > numRounds = endGame "You lose"
                             | otherwise = return ()
 
--- TODO: 
--- 1. Be able to read [1,2] and translate it to an AnswerResult
-playRound :: Guess -> AnswerResult -> [String] -> Int -> IO ()
-playRound guess prevResult possibilities roundNum =
-  let makeNextGuress score = case uncurry AnswerResult $ score of 
-          AnswerResult x y ->
-            playRound guess prevResult possibilities (roundNum + 1)
+
+playRound :: CFG -> [String] -> Int -> IO ()
+playRound cfg@(CFG cfGuess cfResult) possibilities roundNum =
+  let 
+    chooseCFG score = case (uncurry AnswerResult score) > cfResult of
+                          True -> CFG guess (uncurry AnswerResult score)
+                          False -> cfg
+    guess = genCode possibilities cfg
   in do
+
     putStrLn $ "My guess is: " ++ guess
     putStrLn "How did I do?"
     score <- readScore
     checkForGameOver score roundNum
-    makeNextGuress score
+    playRound (chooseCFG score) possibilities (roundNum + 1)
   
 startGame :: IO ()
 startGame = do
-  playRound (genCode possibilities "" (AnswerResult 0 0)) (AnswerResult 0 0) possibilities 1
+  cfg <- genInitialCFG
+  playRound cfg possibilities 1
   return ()

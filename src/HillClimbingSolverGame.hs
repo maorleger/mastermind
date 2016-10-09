@@ -59,11 +59,12 @@ randomPegsToShift pegsToKeep positionsKept pegsLeft = do
     False -> randomPegsToShift pegsToKeep (randomNumber : positionsKept) (pegsLeft - 1)
 
 replaceAtIndex :: Int -> a -> [a] -> [a]
-replaceAtIndex idx newElem ls = a ++ (newElem:b) where (a, (_:b)) = splitAt idx ls
+replaceAtIndex idx newElem ls = a ++ (newElem:b) 
+  where (a, (_:b)) = splitAt idx ls
 
 findIndexToShift :: Guess -> [Maybe Char] -> Int -> Int -> IO Int
 findIndexToShift oldCode newCode posToShiftFrom attempts
-  | attempts == 20 = putStrLn "more than 20 attempts have been made to shift a position" >> exitSuccess
+  | attempts == 2000 = putStrLn "more than 2000 attempts have been made to shift a position" >> exitSuccess
   | otherwise = 
       let validPosition newPos oldPos newCode = 
             -- we got a random number that is the same as the position our peg is alrady in
@@ -104,7 +105,8 @@ createNewLetters (x:xs) newCode =
   case x of
     Nothing -> do
       r <- randomRIO ('A', 'F')
-      createNewLetters xs (r : newCode)
+      if elem r newCode then createNewLetters (x:xs) newCode
+      else createNewLetters xs (r : newCode)
     Just c -> createNewLetters xs (c : newCode)
 
 
@@ -117,13 +119,19 @@ createCode guess pegsToKeep pegsToShift =
     codeFromWhites >>= (\newGuess -> createNewLetters newGuess [])
 
 
-genCode :: String -> CFG -> IO Guess
-genCode pegs (CFG guess (AnswerResult blackPegs whitePegs)) = 
+genCode :: String -> CFG  -> [Guess] -> IO Guess
+genCode pegs cfg@(CFG guess (AnswerResult blackPegs whitePegs)) history = 
   do
     pegsToKeep <- randomPegsToKeep [] blackPegs
     pegsToShift <- randomPegsToShift pegsToKeep [] whitePegs
-    createCode guess pegsToKeep pegsToShift
-
+    code <- createCode guess pegsToKeep pegsToShift
+    putStrLn guess
+    putStrLn code
+    print history
+    if code `elem` history
+      then putStrLn ("code of " ++ code ++ " is same as guess of " ++ guess) >>
+        genCode pegs cfg history
+      else return code
 
 genInitialCFG :: IO CFG
 genInitialCFG = do
@@ -137,22 +145,35 @@ checkForGameOver _ roundNum | roundNum > numRounds = endGame "You lose"
                             | otherwise = return ()
 
 
-playRound :: CFG -> String -> Int -> IO ()
-playRound cfg@(CFG cfGuess cfResult) pegs roundNum =
+playRound :: CFG -> String -> Int -> [Guess] -> IO ()
+playRound cfg@(CFG cfGuess cfResult) pegs roundNum history =
   let 
     chooseCFG score guess = case (uncurry AnswerResult score) > cfResult of
                           True -> CFG guess (uncurry AnswerResult score)
                           False -> cfg
   in do
-    guess <- genCode pegs cfg
+    letters <- genRandomLetters
+    positions <- genRandomPositions
+    guess <- genCode pegs cfg history
     putStrLn $ "My guess is: " ++ guess
     putStrLn "How did I do?"
     score <- readScore
     checkForGameOver score roundNum
-    playRound (chooseCFG score guess) pegs (roundNum + 1)
+    playRound (chooseCFG score guess) pegs (roundNum + 1) (guess : history)
   
+genRandomLetters :: IO [Char]
+genRandomLetters = do
+  x <- getStdGen
+  return $ randomRs ('A', 'F') x
+
+genRandomPositions :: IO [Int]
+genRandomPositions = do
+  x <- getStdGen
+  return $ randomRs (0, 3) x
+
 startGame :: IO ()
 startGame = do
+  putStrLn "Hi, I'm Lily! Let's see if I can solve your puzzle"
   cfg <- genInitialCFG
-  playRound cfg CodeBuilder.pegs 1
+  playRound cfg CodeBuilder.pegs 1 []
   return ()

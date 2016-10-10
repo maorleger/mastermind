@@ -14,7 +14,7 @@ readScore = readLn
 readScore' :: Guess -> IO (Int, Int)
 readScore' guess = 
   let
-    answer = "AEEC"
+    answer = "BAAE"
     score = checkGuess guess answer
   in
     return (blackPegs score, whitePegs score)
@@ -73,7 +73,7 @@ replaceAtIndex idx newElem ls = a ++ (newElem:b)
 
 findIndexToShift :: Guess -> [Maybe Char] -> Int -> Int -> IO Int
 findIndexToShift oldCode newCode posToShiftFrom attempts
-  | attempts == 2000 = putStrLn "more than 2000 attempts have been made to shift a position" >> exitSuccess
+  | attempts == 1000000 = putStrLn "more than 1000000 attempts have been made to shift a position" >> exitSuccess
   | otherwise = 
       let validPosition newPos oldPos newCode = 
             -- we got a random number that is the same as the position our peg is alrady in
@@ -131,7 +131,7 @@ inconsistent :: Guess -> [CFG] -> Bool
 inconsistent _ [] = False
 inconsistent newGuess ((CFG guess result):cfgs)
   | newGuess == guess = True
-  | (checkGuess newGuess guess) < result = True
+  | (checkGuess newGuess guess) /= result = True
   | otherwise = False || inconsistent newGuess cfgs
 
 genCode :: String -> CFG  -> [CFG] -> IO Guess

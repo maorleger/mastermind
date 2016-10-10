@@ -11,8 +11,17 @@ import System.Exit (exitSuccess)
 readScore :: IO (Int, Int)
 readScore = readLn
 
+readScore' :: Guess -> IO (Int, Int)
+readScore' guess = 
+  let
+    answer = "AEFD"
+    score = checkGuess guess answer
+  in
+    return (blackPegs score, whitePegs score)
+    
+
 -- Current Favorite Guess
-data CFG = CFG Guess AnswerResult
+data CFG = CFG Guess AnswerResult deriving (Eq, Show)
 
 
 -- heuristic gives the distance to the goal by penalizing
@@ -105,8 +114,7 @@ createNewLetters (x:xs) newCode =
   case x of
     Nothing -> do
       r <- randomRIO ('A', 'F')
-      if elem r newCode then createNewLetters (x:xs) newCode
-      else createNewLetters xs (r : newCode)
+      createNewLetters xs (r : newCode)
     Just c -> createNewLetters xs (c : newCode)
 
 
@@ -119,17 +127,25 @@ createCode guess pegsToKeep pegsToShift =
     codeFromWhites >>= (\newGuess -> createNewLetters newGuess [])
 
 
-genCode :: String -> CFG  -> [Guess] -> IO Guess
+inconsistent :: Guess -> [CFG] -> Bool
+inconsistent _ [] = False
+inconsistent newGuess ((CFG guess result):cfgs)
+  | newGuess == guess = True
+  | (checkGuess newGuess guess) < result = True
+  | otherwise = False || inconsistent newGuess cfgs
+
+genCode :: String -> CFG  -> [CFG] -> IO Guess
 genCode pegs cfg@(CFG guess (AnswerResult blackPegs whitePegs)) history = 
   do
     pegsToKeep <- randomPegsToKeep [] blackPegs
     pegsToShift <- randomPegsToShift pegsToKeep [] whitePegs
     code <- createCode guess pegsToKeep pegsToShift
-    putStrLn guess
-    putStrLn code
+    putStrLn $ "old guess: " ++ guess
+    putStrLn $ "new guess: " ++ code
+    putStrLn "history below:"
     print history
-    if code `elem` history
-      then putStrLn ("code of " ++ code ++ " is same as guess of " ++ guess) >>
+    if inconsistent code history
+      then putStrLn ("code of " ++ code ++ " is inconsistent as guess of " ++ guess) >>
         genCode pegs cfg history
       else return code
 
@@ -145,7 +161,7 @@ checkForGameOver _ roundNum | roundNum > numRounds = endGame "You lose"
                             | otherwise = return ()
 
 
-playRound :: CFG -> String -> Int -> [Guess] -> IO ()
+playRound :: CFG -> String -> Int -> [CFG] -> IO ()
 playRound cfg@(CFG cfGuess cfResult) pegs roundNum history =
   let 
     chooseCFG score guess = case (uncurry AnswerResult score) > cfResult of
@@ -157,19 +173,15 @@ playRound cfg@(CFG cfGuess cfResult) pegs roundNum history =
     guess <- genCode pegs cfg history
     putStrLn $ "My guess is: " ++ guess
     putStrLn "How did I do?"
-    score <- readScore
+    score <- readScore' guess
     checkForGameOver score roundNum
-    playRound (chooseCFG score guess) pegs (roundNum + 1) (guess : history)
+    playRound (chooseCFG score guess) pegs (roundNum + 1) ((CFG guess (uncurry AnswerResult score)) : history)
   
 genRandomLetters :: IO [Char]
-genRandomLetters = do
-  x <- getStdGen
-  return $ randomRs ('A', 'F') x
+genRandomLetters = getStdGen >>= (\gen -> return $ randomRs ('A', 'F') gen)
 
 genRandomPositions :: IO [Int]
-genRandomPositions = do
-  x <- getStdGen
-  return $ randomRs (0, 3) x
+genRandomPositions = getStdGen >>= (\gen -> return $ randomRs (0, 3) gen)
 
 startGame :: IO ()
 startGame = do

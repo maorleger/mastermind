@@ -14,11 +14,11 @@ readScore = readLn
 readScore' :: Guess -> IO (Int, Int)
 readScore' guess = 
   let
-    answer = "AEFD"
+    answer = "AEEC"
     score = checkGuess guess answer
   in
     return (blackPegs score, whitePegs score)
-    
+
 
 -- Current Favorite Guess
 data CFG = CFG Guess AnswerResult deriving (Eq, Show)
@@ -167,15 +167,18 @@ playRound cfg@(CFG cfGuess cfResult) pegs roundNum history =
     chooseCFG score guess = case (uncurry AnswerResult score) > cfResult of
                           True -> CFG guess (uncurry AnswerResult score)
                           False -> cfg
+    choosePegs guess (0,0) oldPegs = filter (not . flip elem guess) oldPegs
+    choosePegs _ _ oldPegs = oldPegs
   in do
     letters <- genRandomLetters
     positions <- genRandomPositions
     guess <- genCode pegs cfg history
+    putStrLn $ "The pegs are: " ++ pegs
     putStrLn $ "My guess is: " ++ guess
     putStrLn "How did I do?"
     score <- readScore' guess
     checkForGameOver score roundNum
-    playRound (chooseCFG score guess) pegs (roundNum + 1) ((CFG guess (uncurry AnswerResult score)) : history)
+    playRound (chooseCFG score guess) (choosePegs guess score pegs) (roundNum + 1) ((CFG guess (uncurry AnswerResult score)) : history)
   
 genRandomLetters :: IO [Char]
 genRandomLetters = getStdGen >>= (\gen -> return $ randomRs ('A', 'F') gen)

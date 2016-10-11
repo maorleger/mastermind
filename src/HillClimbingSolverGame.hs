@@ -140,9 +140,10 @@ inconsistent newGuess ((CFG guess result):cfgs)
   | (checkGuess newGuess guess) /= result = True
   | otherwise = False || inconsistent newGuess cfgs
 
-genCode :: String -> CFG  -> [CFG] -> IO Guess
-genCode pegs cfg@(CFG guess (AnswerResult blackPegs whitePegs)) history = 
-  do
+genCode :: String -> CFG  -> [CFG] -> Int -> IO Guess
+genCode pegs cfg@(CFG guess (AnswerResult blackPegs whitePegs)) history attempts 
+  | attempts > 200 = putStrLn "Cannot deduce the next guess, are you sure you scored my guesses correctly? " >> exitSuccess 
+  | otherwise = do
     pegsToKeep <- randomPegsToKeep [] blackPegs
     pegsToShift <- randomPegsToShift pegsToKeep [] whitePegs
     code <- createCode guess pegsToKeep pegsToShift
@@ -152,7 +153,7 @@ genCode pegs cfg@(CFG guess (AnswerResult blackPegs whitePegs)) history =
     --print history
     if inconsistent code history
       --then putStrLn ("code of " ++ code ++ " is inconsistent as guess of " ++ guess) >>
-        then genCode pegs cfg history
+        then genCode pegs cfg history (attempts + 1)
       else return code
 
 genInitialCFG :: IO CFG
@@ -176,12 +177,12 @@ playRound cfg@(CFG cfGuess cfResult) pegs roundNum history =
     choosePegs guess (0,0) oldPegs = filter (not . flip elem guess) oldPegs
     choosePegs _ _ oldPegs = oldPegs
   in do
-    guess <- genCode pegs cfg history
+    guess <- genCode pegs cfg history 0
     putStrLn $ "Round: " ++ (show roundNum)
     --putStrLn $ "The pegs are: " ++ pegs
     putStrLn $ "My guess is: " ++ guess
     putStrLn "How did I do?"
-    score <- readScore' guess
+    score <- readScore--' guess
     checkForGameOver score roundNum
     playRound (chooseCFG score guess) (choosePegs guess score pegs) (roundNum + 1) ((CFG guess (uncurry AnswerResult score)) : history)
 

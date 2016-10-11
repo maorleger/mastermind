@@ -14,7 +14,7 @@ readScore = readLn
 readScore' :: Guess -> IO (Int, Int)
 readScore' guess = 
   let
-    answer = "BAAE"
+    answer = "BEEF"
     score = checkGuess guess answer
   in
     return (blackPegs score, whitePegs score)
@@ -73,11 +73,14 @@ replaceAtIndex idx newElem ls = a ++ (newElem:b)
 
 findIndexToShift :: Guess -> [Maybe Char] -> Int -> Int -> IO Int
 findIndexToShift oldCode newCode posToShiftFrom attempts
-  | attempts == 1000000 = putStrLn "more than 1000000 attempts have been made to shift a position" >> exitSuccess
+  | attempts == 20 = 
+      putStrLn "more than 20 attempts have been made to shift a position, Keeping it in place" >> 
+      return posToShiftFrom
   | otherwise = 
-      let validPosition newPos oldPos newCode = 
+      let
+        validPosition newPos oldPos newCode = 
             -- we got a random number that is the same as the position our peg is alrady in
-            if newPos == oldPos
+            if (newPos == oldPos)
               then False
             else
               case newCode !! newPos of
@@ -89,7 +92,10 @@ findIndexToShift oldCode newCode posToShiftFrom attempts
           if (validPosition proposedNewPos posToShiftFrom newCode) 
           then return proposedNewPos 
           -- if at first you dont succeed...
-          else findIndexToShift oldCode newCode posToShiftFrom (attempts + 1)
+          else do
+            --putStrLn $ "old code: " ++ (show oldCode)
+            --putStrLn $ "shifting " ++ (show posToShiftFrom) ++ ", proposedNewPos " ++ (show proposedNewPos) ++ "is not valid in " ++ (show newCode)
+            findIndexToShift oldCode newCode posToShiftFrom (attempts + 1)
         )
         
 createBlackCode :: Guess -> [Maybe Char] -> [Int] -> [Maybe Char]
@@ -140,13 +146,13 @@ genCode pegs cfg@(CFG guess (AnswerResult blackPegs whitePegs)) history =
     pegsToKeep <- randomPegsToKeep [] blackPegs
     pegsToShift <- randomPegsToShift pegsToKeep [] whitePegs
     code <- createCode guess pegsToKeep pegsToShift
-    putStrLn $ "old guess: " ++ guess
-    putStrLn $ "new guess: " ++ code
-    putStrLn "history below:"
-    print history
+    --putStrLn $ "old guess: " ++ guess
+    --putStrLn $ "new guess: " ++ code
+    --putStrLn "history below:"
+    --print history
     if inconsistent code history
-      then putStrLn ("code of " ++ code ++ " is inconsistent as guess of " ++ guess) >>
-        genCode pegs cfg history
+      --then putStrLn ("code of " ++ code ++ " is inconsistent as guess of " ++ guess) >>
+        then genCode pegs cfg history
       else return code
 
 genInitialCFG :: IO CFG
@@ -170,21 +176,14 @@ playRound cfg@(CFG cfGuess cfResult) pegs roundNum history =
     choosePegs guess (0,0) oldPegs = filter (not . flip elem guess) oldPegs
     choosePegs _ _ oldPegs = oldPegs
   in do
-    letters <- genRandomLetters
-    positions <- genRandomPositions
     guess <- genCode pegs cfg history
-    putStrLn $ "The pegs are: " ++ pegs
+    putStrLn $ "Round: " ++ (show roundNum)
+    --putStrLn $ "The pegs are: " ++ pegs
     putStrLn $ "My guess is: " ++ guess
     putStrLn "How did I do?"
     score <- readScore' guess
     checkForGameOver score roundNum
     playRound (chooseCFG score guess) (choosePegs guess score pegs) (roundNum + 1) ((CFG guess (uncurry AnswerResult score)) : history)
-  
-genRandomLetters :: IO [Char]
-genRandomLetters = getStdGen >>= (\gen -> return $ randomRs ('A', 'F') gen)
-
-genRandomPositions :: IO [Int]
-genRandomPositions = getStdGen >>= (\gen -> return $ randomRs (0, 3) gen)
 
 startGame :: IO ()
 startGame = do

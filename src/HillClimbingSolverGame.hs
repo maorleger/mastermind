@@ -22,17 +22,18 @@ startGame =
 playRound :: CFG -> Int -> [CFG] -> IO ()
 playRound cfg@(CFG _ cfResult) roundNum history =
   let
-    chooseCFG score guess = case (uncurry AnswerResult score) > cfResult of
-                          True -> CFG guess (uncurry AnswerResult score)
-                          False -> cfg
+    chooseCFG score guess = 
+      if uncurry AnswerResult score > cfResult 
+        then CFG guess (uncurry AnswerResult score) 
+        else cfg
   in do
     guess <- genCode cfg history 0
-    putStrLn $ "Round: " ++ (show roundNum)
+    putStrLn $ "Round: " ++ show roundNum
     putStrLn $ "My guess is: " ++ guess
     putStrLn "How did I do?"
     score <- readScore' guess
     checkForGameOver score roundNum
-    playRound (chooseCFG score guess) (roundNum + 1) ((CFG guess (uncurry AnswerResult score)) : history)
+    playRound (chooseCFG score guess) (roundNum + 1) (CFG guess (uncurry AnswerResult score) : history)
 
 
 readScore :: IO (Int, Int)
@@ -71,9 +72,9 @@ randomPegsToKeep positionsKept 0 = return positionsKept
 randomPegsToKeep positionsKept pegsLeft =
   randomRIO (0, 3) >>=
     (\randomNumber ->
-      case randomNumber `elem` positionsKept of
-        True -> randomPegsToKeep positionsKept pegsLeft
-        False -> randomPegsToKeep (randomNumber : positionsKept) (pegsLeft - 1))
+      if randomNumber `elem` positionsKept
+        then randomPegsToKeep positionsKept pegsLeft
+        else randomPegsToKeep (randomNumber : positionsKept) (pegsLeft - 1))
 
 
 randomPegsToShift :: [Int] -> [Int] -> Int -> IO [Int]
@@ -81,9 +82,9 @@ randomPegsToShift _ positionsKept 0 = return positionsKept
 randomPegsToShift pegsToKeep positionsKept pegsLeft =
   randomRIO (0, 3) >>=
   (\randomNumber -> 
-    case randomNumber `elem` (positionsKept ++ pegsToKeep) of
-      True -> randomPegsToShift pegsToKeep positionsKept pegsLeft
-      False -> randomPegsToShift pegsToKeep (randomNumber : positionsKept) (pegsLeft - 1))
+    if randomNumber `elem` (positionsKept ++ pegsToKeep)
+      then randomPegsToShift pegsToKeep positionsKept pegsLeft
+      else randomPegsToShift pegsToKeep (randomNumber : positionsKept) (pegsLeft - 1))
 
 
 createCode :: Guess -> [Int] -> [Int] -> IO Guess
@@ -129,7 +130,7 @@ findIndexToShift oldCode newCode posToShiftFrom attempts
             not (newPos == oldPos || isJust (constructedCode !! newPos))
       in randomRIO (0, length oldCode - 1) >>=
         (\proposedNewPos -> 
-          if (validPosition proposedNewPos posToShiftFrom newCode) 
+          if validPosition proposedNewPos posToShiftFrom newCode
           then return proposedNewPos 
           -- if at first you dont succeed...
           else findIndexToShift oldCode newCode posToShiftFrom (attempts + 1)
@@ -138,9 +139,9 @@ findIndexToShift oldCode newCode posToShiftFrom attempts
 
 replaceAtIndex :: Int -> a -> [a] -> [a]
 replaceAtIndex idx newElem ls = a ++ (newElem:b) 
-  where (a, (_:b)) = splitAt idx ls
+  where (a, _ : b) = splitAt idx ls
 
-createNewLetters :: [Maybe Char] -> [Char] -> IO [Char]
+createNewLetters :: [Maybe Char] -> String -> IO String
 createNewLetters [] newCode = return . reverse $ newCode
 createNewLetters (x:xs) newCode = 
   let range = (minimum CodeBuilder.pegs, maximum CodeBuilder.pegs)
@@ -152,6 +153,6 @@ createNewLetters (x:xs) newCode =
 
 
 inconsistent :: Guess -> [CFG] -> Bool
-inconsistent newGuess cfgs
-  = any (\(CFG oldGuess result) -> newGuess == oldGuess || ((checkGuess newGuess oldGuess) /= result)) cfgs
+inconsistent newGuess
+  = any (\(CFG oldGuess result) -> newGuess == oldGuess || (checkGuess newGuess oldGuess /= result))
 

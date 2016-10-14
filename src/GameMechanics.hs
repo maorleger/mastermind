@@ -67,7 +67,7 @@ incorrectPositionsCalc answer (x':xs') =
 validateGuess :: Answer -> Guess -> Either ValidationMessage Guess
 validateGuess answer guess
   | length answer /= length guess = Left $ "Your guess needs to be " ++ (show . length $ answer) ++ " characters long"
-  | any (\x -> not $ elem x pegs) guess = Left $ "Your guess can only include the following letters: [" ++ pegs ++ "]"
+  | any (`notElem` pegs) guess = Left $ "Your guess can only include the following letters: [" ++ pegs ++ "]"
   | otherwise = Right guess
 
 

@@ -18,12 +18,38 @@ data AnswerResult = AnswerResult {
   whitePegs :: Int
 } deriving (Eq)
 
+-- Current Favorite Guess
+data CFG = CFG Guess AnswerResult deriving (Eq, Show)
+
+instance Ord AnswerResult where
+  compare result result' = compare (computeScore result) (computeScore result')
+
 instance Show AnswerResult where
   show (AnswerResult x y) = "[" ++ show x ++ "," ++ show y ++ "]"
 
 instance Monoid AnswerResult where
   mempty = AnswerResult 0 0
   mappend (AnswerResult x y) (AnswerResult x' y') = AnswerResult (x + x') (y + y')
+
+-- hill climbing heuristic gives the distance to the goal by penalizing
+-- the pegs with the right colours but in wrong position.
+computeScore :: AnswerResult -> Int
+computeScore (AnswerResult black white) = 
+  case (black, white) of
+    (0, 0) -> 0
+    (0, 1) -> 1
+    (1, 0) -> 2
+    (0, 2) -> 3
+    (1, 1) -> 4
+    (2, 0) -> 5
+    (0, 3) -> 6
+    (1, 2) -> 7
+    (2, 1) -> 8
+    (3, 0) -> 9
+    (0, 4) -> 10
+    (1, 3) -> 11
+    (2, 2) -> 12
+    (4, 0) -> 13
 
 
 endGame :: String -> IO ()

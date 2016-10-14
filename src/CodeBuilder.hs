@@ -6,16 +6,16 @@ module CodeBuilder (
 
 import System.Random (randomRIO)
 
+
 pegs :: String
 pegs = "ABCDEF"
+
 
 possibilities :: [String]
 possibilities = [[a,b,c,d] | a <- pegs, b <- pegs, c <- pegs, d <- pegs]
 
-makeCode :: IO String
-makeCode = makeCode' pegs
 
-makeCode' :: String -> IO String
-makeCode' pegs' = do
+makeCode :: IO String
+makeCode = do
   randomIndex <- randomRIO (0, length possibilities - 1)
   return $ possibilities !! randomIndex

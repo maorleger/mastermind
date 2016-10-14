@@ -4,11 +4,12 @@ import GameMechanics
 import qualified CodeBuilder
 import System.Random
 import System.Exit (exitSuccess)
+import Data.Maybe (isJust)
 
 
 startGame :: IO ()
 startGame = 
-  let 
+  let
     genInitialCFG = CodeBuilder.makeCode >>= (\code -> return $ CFG code (AnswerResult 0 0))
   in 
     putStrLn "Hi, I'm Lily! Let's see if I can solve your puzzle" >>
@@ -20,7 +21,7 @@ startGame =
 
 playRound :: CFG -> Int -> [CFG] -> IO ()
 playRound cfg@(CFG _ cfResult) roundNum history =
-  let 
+  let
     chooseCFG score guess = case (uncurry AnswerResult score) > cfResult of
                           True -> CFG guess (uncurry AnswerResult score)
                           False -> cfg
@@ -67,20 +68,22 @@ genCode cfg@(CFG guess (AnswerResult blacks whites)) history attempts
 
 randomPegsToKeep :: [Int] -> Int -> IO [Int]
 randomPegsToKeep positionsKept 0 = return positionsKept
-randomPegsToKeep positionsKept pegsLeft = do
-  randomNumber <- randomRIO (0, 3)
-  case randomNumber `elem` positionsKept of
-    True -> randomPegsToKeep positionsKept pegsLeft
-    False -> randomPegsToKeep (randomNumber : positionsKept) (pegsLeft - 1)
+randomPegsToKeep positionsKept pegsLeft =
+  randomRIO (0, 3) >>=
+    (\randomNumber ->
+      case randomNumber `elem` positionsKept of
+        True -> randomPegsToKeep positionsKept pegsLeft
+        False -> randomPegsToKeep (randomNumber : positionsKept) (pegsLeft - 1))
 
 
 randomPegsToShift :: [Int] -> [Int] -> Int -> IO [Int]
 randomPegsToShift _ positionsKept 0 = return positionsKept
-randomPegsToShift pegsToKeep positionsKept pegsLeft = do
-  randomNumber <- randomRIO (0, 3)
-  case randomNumber `elem` (positionsKept ++ pegsToKeep) of
-    True -> randomPegsToShift pegsToKeep positionsKept pegsLeft
-    False -> randomPegsToShift pegsToKeep (randomNumber : positionsKept) (pegsLeft - 1)
+randomPegsToShift pegsToKeep positionsKept pegsLeft =
+  randomRIO (0, 3) >>=
+  (\randomNumber -> 
+    case randomNumber `elem` (positionsKept ++ pegsToKeep) of
+      True -> randomPegsToShift pegsToKeep positionsKept pegsLeft
+      False -> randomPegsToShift pegsToKeep (randomNumber : positionsKept) (pegsLeft - 1))
 
 
 createCode :: Guess -> [Int] -> [Int] -> IO Guess
@@ -95,15 +98,21 @@ createCode guess pegsToKeep pegsToShift =
 createBlackCode :: Guess -> [Maybe Char] -> [Int] -> [Maybe Char]
 createBlackCode _ newCode [] = newCode
 createBlackCode oldCode newCode (black:blacks) =
-  createBlackCode oldCode (replaceAtIndex black (Just (oldCode !! black)) newCode) blacks
+  let
+    constructedCode = replaceAtIndex black (Just (oldCode !! black)) newCode
+  in 
+    createBlackCode oldCode constructedCode blacks
 
 
 createWhiteCode :: Guess -> [Maybe Char] -> [Int] -> IO [Maybe Char]
 createWhiteCode _ newCode [] = return newCode
 createWhiteCode oldCode newCode (white:whites) = 
-  findIndexToShift oldCode newCode white 0 >>=
-    (\index -> 
-      createWhiteCode oldCode  (replaceAtIndex index (Just (oldCode !! white)) newCode) whites)
+  let
+    constructCode index = replaceAtIndex index (Just (oldCode !! white)) newCode
+  in
+    findIndexToShift oldCode newCode white 0 >>=
+      (\index -> 
+        createWhiteCode oldCode (constructCode index) whites)
 
 
 findIndexToShift :: Guess -> [Maybe Char] -> Int -> Int -> IO Int
@@ -114,21 +123,16 @@ findIndexToShift oldCode newCode posToShiftFrom attempts
   | otherwise = 
       let
         validPosition newPos oldPos constructedCode = 
+            -- invalid IFF:
             -- we got a random number that is the same as the position our peg is alrady in
-            if (newPos == oldPos)
-              then False
-            else
-              case constructedCode !! newPos of
-                -- we got a random number but that position is already taken
-                Just _ -> False
-                Nothing -> True
+            -- or we got a new random number but that position is already taken
+            not (newPos == oldPos || isJust (constructedCode !! newPos))
       in randomRIO (0, length oldCode - 1) >>=
         (\proposedNewPos -> 
           if (validPosition proposedNewPos posToShiftFrom newCode) 
           then return proposedNewPos 
           -- if at first you dont succeed...
-          else do
-            findIndexToShift oldCode newCode posToShiftFrom (attempts + 1)
+          else findIndexToShift oldCode newCode posToShiftFrom (attempts + 1)
         )
 
 

@@ -152,9 +152,6 @@ createNewLetters (x:xs) newCode =
 
 
 inconsistent :: Guess -> [CFG] -> Bool
-inconsistent _ [] = False
-inconsistent newGuess ((CFG guess result):cfgs)
-  | newGuess == guess = True
-  | (checkGuess newGuess guess) /= result = True
-  | otherwise = False || inconsistent newGuess cfgs
+inconsistent newGuess cfgs
+  = any (\(CFG oldGuess result) -> newGuess == oldGuess || ((checkGuess newGuess oldGuess) /= result)) cfgs
 

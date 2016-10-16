@@ -25,7 +25,7 @@ instance Ord AnswerResult where
   compare result result' = compare (computeScore result) (computeScore result')
 
 instance Show AnswerResult where
-  show (AnswerResult x y) = "[" ++ show x ++ "," ++ show y ++ "]"
+  show (AnswerResult x y) = "(" ++ show x ++ "," ++ show y ++ ")"
 
 instance Monoid AnswerResult where
   mempty = AnswerResult 0 0

@@ -3,7 +3,7 @@ module HillClimbingSolverGame where
 import GameMechanics
 import qualified CodeBuilder
 import System.Random
-import System.Exit (exitSuccess)
+import System.Exit (exitSuccess, exitFailure)
 import Data.Maybe (isJust)
 
 
@@ -57,7 +57,11 @@ checkForGameOver _ roundNum | roundNum > numRounds = endGame "You lose"
 
 genCode :: CFG  -> [CFG] -> Int -> IO Guess
 genCode cfg@(CFG guess (AnswerResult blacks whites)) history attempts 
-  | attempts > 20000 = putStrLn "Cannot deduce the next guess, are you sure you scored my guesses correctly? " >> exitSuccess 
+  | attempts > 20000 = do
+      putStrLn $ "Cannot deduce the next guess, are you sure you scored my guesses correctly? "
+      putStrLn $ "history: " ++ (show history)
+      putStrLn $ "cfg: " ++ (show cfg)
+      exitFailure
   | otherwise = do
       pegsToKeep <- randomPegsToKeep [] blacks
       pegsToShift <- randomPegsToShift pegsToKeep [] whites

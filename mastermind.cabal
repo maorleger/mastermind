@@ -14,7 +14,8 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Game
+  exposed-modules:     HumanSolverGame
+                    ,  HillClimbingSolverGame
                     ,  CodeBuilder
                     ,  GameMechanics
   build-depends:       base >= 4.7 && < 5

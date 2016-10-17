@@ -31,7 +31,7 @@ playRound cfg@(CFG _ cfResult) roundNum history =
     putStrLn $ "Round: " ++ show roundNum
     putStrLn $ "My guess is: " ++ guess
     putStrLn "How did I do?"
-    score <- readScore' guess
+    score <- readScore--' guess
     checkForGameOver score roundNum
     playRound (chooseCFG score guess) (roundNum + 1) (CFG guess (uncurry AnswerResult score) : history)
 

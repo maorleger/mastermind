@@ -58,9 +58,9 @@ checkForGameOver _ roundNum | roundNum > numRounds = endGame "You lose"
 genCode :: CFG  -> [CFG] -> Int -> IO Guess
 genCode cfg@(CFG guess (AnswerResult blacks whites)) history attempts 
   | attempts > 20000 = do
-      putStrLn $ "Cannot deduce the next guess, are you sure you scored my guesses correctly? "
-      putStrLn $ "history: " ++ (show history)
-      putStrLn $ "cfg: " ++ (show cfg)
+      putStrLn "Cannot deduce the next guess, are you sure you scored my guesses correctly? "
+      putStrLn $ "history: " ++ show history
+      putStrLn $ "cfg: " ++ show cfg
       exitFailure
   | otherwise = do
       pegsToKeep <- randomPegsToKeep [] blacks
@@ -142,6 +142,7 @@ findIndexToShift oldCode newCode posToShiftFrom attempts
 
 
 replaceAtIndex :: Int -> a -> [a] -> [a]
+replaceAtIndex _ _ [] = []
 replaceAtIndex idx newElem ls = a ++ (newElem:b) 
   where (a, _ : b) = splitAt idx ls
 

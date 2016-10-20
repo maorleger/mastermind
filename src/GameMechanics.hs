@@ -1,15 +1,15 @@
 module GameMechanics where
 
 import Data.List (delete)
-import CodeBuilder (pegs)
+import CodeBuilder (pegs, Peg)
 import System.Exit (exitSuccess)
 
 numRounds :: Int
 numRounds = 10
 
 type ValidationMessage = String
-type Guess = String
-type Answer = String
+type Guess = [Peg]
+type Answer = [Peg]
 
 -- AnswerResult
 data AnswerResult = AnswerResult { 
@@ -66,7 +66,7 @@ incorrectPositionsCalc answer (x':xs') =
 validateGuess :: Answer -> Guess -> Either ValidationMessage Guess
 validateGuess answer guess
   | length answer /= length guess = Left $ "Your guess needs to be " ++ (show . length $ answer) ++ " characters long"
-  | any (`notElem` pegs) guess = Left $ "Your guess can only include the following letters: [" ++ pegs ++ "]"
+  | any (`notElem` pegs) guess = Left $ "Your guess can only include the following letters: [" ++ (show pegs) ++ "]"
   | otherwise = Right guess
 
 

@@ -5,6 +5,7 @@ import qualified CodeBuilder
 import System.Random
 import System.Exit (exitSuccess, exitFailure)
 import Data.Maybe (isJust)
+import CodeBuilder
 
 
 startGame :: IO ()
@@ -29,7 +30,7 @@ playRound cfg@(CFG _ cfResult) roundNum history =
   in do
     guess <- genCode cfg history 0
     putStrLn $ "Round: " ++ show roundNum
-    putStrLn $ "My guess is: " ++ guess
+    putStrLn $ "My guess is: " ++ show guess
     putStrLn "How did I do?"
     score <- readScore--' guess
     checkForGameOver score roundNum
@@ -43,7 +44,7 @@ readScore = readLn
 readScore' :: Guess -> IO (Int, Int)
 readScore' guess = 
   let
-    answer = "BEEF"
+    answer = [Blue, Green, Yellow, Blue]
     score = checkGuess guess answer
   in
     return (blackPegs score, whitePegs score)
@@ -100,7 +101,7 @@ createCode guess pegsToKeep pegsToShift =
     codeFromWhites >>= (\newGuess -> createNewLetters newGuess [])
 
      
-createBlackCode :: Guess -> [Maybe Char] -> [Int] -> [Maybe Char]
+createBlackCode :: Guess -> [Maybe Peg] -> [Int] -> [Maybe Peg]
 createBlackCode _ newCode [] = newCode
 createBlackCode oldCode newCode (black:blacks) =
   let
@@ -109,7 +110,7 @@ createBlackCode oldCode newCode (black:blacks) =
     createBlackCode oldCode constructedCode blacks
 
 
-createWhiteCode :: Guess -> [Maybe Char] -> [Int] -> IO [Maybe Char]
+createWhiteCode :: Guess -> [Maybe Peg] -> [Int] -> IO [Maybe Peg]
 createWhiteCode _ newCode [] = return newCode
 createWhiteCode oldCode newCode (white:whites) = 
   let
@@ -120,7 +121,7 @@ createWhiteCode oldCode newCode (white:whites) =
         createWhiteCode oldCode (constructCode index) whites)
 
 
-findIndexToShift :: Guess -> [Maybe Char] -> Int -> Int -> IO Int
+findIndexToShift :: Guess -> [Maybe Peg] -> Int -> Int -> IO Int
 findIndexToShift oldCode newCode posToShiftFrom attempts
   | attempts == 20 = 
       putStrLn "more than 20 attempts have been made to shift a position, Keeping it in place" >> 
@@ -146,7 +147,7 @@ replaceAtIndex _ _ [] = []
 replaceAtIndex idx newElem ls = a ++ (newElem:b) 
   where (a, _ : b) = splitAt idx ls
 
-createNewLetters :: [Maybe Char] -> String -> IO String
+createNewLetters :: [Maybe Peg] -> [Peg] -> IO [Peg]
 createNewLetters [] newCode = return . reverse $ newCode
 createNewLetters (x:xs) newCode = 
   let range = (minimum CodeBuilder.pegs, maximum CodeBuilder.pegs)

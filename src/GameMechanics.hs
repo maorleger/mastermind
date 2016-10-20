@@ -7,12 +7,11 @@ import System.Exit (exitSuccess)
 numRounds :: Int
 numRounds = 10
 
--- AnswerResult
-
 type ValidationMessage = String
 type Guess = String
 type Answer = String
 
+-- AnswerResult
 data AnswerResult = AnswerResult { 
   blackPegs :: Int,
   whitePegs :: Int

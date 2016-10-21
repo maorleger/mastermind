@@ -5,18 +5,6 @@ import GameMechanics
 import Data.Char (toUpper)
 import System.IO
 
-toPeg :: Char -> Peg
-toPeg c = 
-  case c of
-    'B' -> Blue
-    'G' -> Green
-    'R' -> Red
-    'Y' -> Yellow
-    'O' -> Orange
-    'P' -> Pink
-
-toGuess :: String -> [Peg]
-toGuess guess = map toPeg guess
 
 playRound :: Answer -> Int -> IO ()
 playRound answer roundNum =
@@ -24,7 +12,7 @@ playRound answer roundNum =
     putStr "Please enter a guess $ "
     hFlush stdout
     guess <- (fmap . fmap) toUpper getLine
-    case checkGuess answer <$> validateGuess answer (toGuess guess) of
+    case checkGuess answer <$> validateGuess answer guess of
       Left msg ->
         putStrLn msg >>
         playRound answer roundNum
@@ -37,5 +25,8 @@ playRound answer roundNum =
 
 startGame :: IO ()
 startGame = do
+  putStrLn $ "Hi there! I made up a code that consists of the following pegs: " ++ show pegs
+  putStrLn "You can guess the code by using the first letter of each color to represent a peg"
+  putStrLn "For example, to guess [Blue, Orange, Pink, Yellow] you can input BOPY"
   code <- makeCode
   playRound code 1

@@ -10,7 +10,7 @@ import CodeBuilder
 
 startGame :: IO ()
 startGame = 
-  let
+  let -- TODO: change the CFG so that AnswerResult is first, code is last.
     genInitialCFG = CodeBuilder.makeCode >>= (\code -> return $ CFG code (AnswerResult 0 0))
   in 
     putStrLn "Hi, I'm Lily! Let's see if I can solve your puzzle" >>

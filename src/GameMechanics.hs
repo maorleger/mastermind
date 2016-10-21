@@ -62,23 +62,6 @@ incorrectPositionsCalc answer (x':xs') =
     then 1 + incorrectPositionsCalc (delete x' answer) xs'
     else 0 + incorrectPositionsCalc answer xs'
 
-toPeg :: Char -> Peg
-toPeg c = 
-  case c of
-    'B' -> Blue
-    'G' -> Green
-    'R' -> Red
-    'Y' -> Yellow
-    'O' -> Orange
-    'P' -> Pink
-
--- todo: the above is non exhaustive of a pattern
--- we need to validate the guess upstream and move
--- the entire logic over to HumanSolverGame
-
-toGuess :: String -> [Peg]
-toGuess = map toPeg
-
 
 validateGuess :: Answer -> String -> Either ValidationMessage Guess
 validateGuess answer guess =
@@ -92,10 +75,8 @@ validateGuess answer guess =
         'O' -> Right Orange
         'P' -> Right Pink
         _  -> Left "Your guess can only include the following pegs: [BGRYOP]"
-         --length answer /= length guess = Left $ "Your guess needs to be " ++ (show . length $ answer) ++ " characters long"
     toGuess = sequence . (map toPeg)
     correctLength guess' = if length answer /= length guess' then Left $ "Your guess needs to be " ++ (show . length $ answer) ++ " characters long" else Right guess'
-    -- correctLength guess' = if length answer /= length guess' then Left $ "Your guess needs to be " ++ (show . length $ answer) ++ " characters long" else Right guess'
   in toGuess guess >>= correctLength
 
 

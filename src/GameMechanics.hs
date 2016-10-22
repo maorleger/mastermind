@@ -3,6 +3,7 @@ module GameMechanics where
 import Data.List (delete)
 import CodeBuilder
 import System.Exit (exitSuccess)
+import Data.Monoid (mappend, (<>))
 
 numRounds :: Int
 numRounds = 10
@@ -12,7 +13,7 @@ type Guess = [Peg]
 type Answer = [Peg]
 
 -- AnswerResult
-data AnswerResult = AnswerResult { 
+data AnswerResult = AnswerResult {
   blackPegs :: Int,
   whitePegs :: Int
 } deriving (Eq)
@@ -24,7 +25,7 @@ instance Ord AnswerResult where
   compare result result' = compare (computeScore result) (computeScore result')
 
 instance Show AnswerResult where
-  show (AnswerResult x y) = "(" ++ show x ++ "," ++ show y ++ ")"
+  show (AnswerResult x y) = "(" <> show x <> "," <> show y <> ")"
 
 instance Monoid AnswerResult where
   mempty = AnswerResult 0 0
@@ -33,7 +34,7 @@ instance Monoid AnswerResult where
 -- hill climbing heuristic gives the distance to the goal by penalizing
 -- the pegs with the right colours but in wrong position.
 computeScore :: AnswerResult -> Int
-computeScore (AnswerResult black white) = 
+computeScore (AnswerResult black white) =
   case (black, white) of
     (0, 0) -> 0
     (0, 1) -> 1
@@ -66,7 +67,7 @@ incorrectPositionsCalc answer (x':xs') =
 validateGuess :: Answer -> String -> Either ValidationMessage Guess
 validateGuess answer guess =
   let
-    toPeg c = 
+    toPeg c =
       case c of
         'B' -> Right Blue
         'G' -> Right Green
@@ -75,8 +76,8 @@ validateGuess answer guess =
         'O' -> Right Orange
         'P' -> Right Pink
         _  -> Left "Your guess can only include the following pegs: [BGRYOP]"
-    toGuess = sequence . (map toPeg)
-    correctLength guess' = if length answer /= length guess' then Left $ "Your guess needs to be " ++ (show . length $ answer) ++ " characters long" else Right guess'
+    toGuess = mapM toPeg
+    correctLength guess' = if length answer /= length guess' then Left $ "Your guess needs to be " <> (show . length $ answer) <> " characters long" else Right guess'
   in toGuess guess >>= correctLength
 
 
@@ -86,8 +87,6 @@ checkGuess answer guess =
     zippedGuesses = zip answer guess
     correctPositions = foldr (\(x, y) acc -> if x == y then acc + 1 else acc) 0 zippedGuesses
     leftOverPairs = filter (uncurry (/=)) zippedGuesses
-    incorrectPositions = incorrectPositionsCalc (map fst leftOverPairs) (map snd leftOverPairs)
+    incorrectPositions = incorrectPositionsCalc (fmap fst leftOverPairs) (fmap snd leftOverPairs)
   in
     AnswerResult correctPositions incorrectPositions
-
-

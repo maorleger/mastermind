@@ -1,9 +1,9 @@
 module CodeBuilder where
 
-import System.Random 
+import System.Random
 
 
-data Peg = 
+data Peg =
     Blue
   | Green
   | Red

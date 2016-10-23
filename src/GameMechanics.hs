@@ -50,6 +50,7 @@ computeScore (AnswerResult black white) =
     (1, 3) -> 11
     (2, 2) -> 12
     (4, 0) -> 13
+    _ -> undefined
 
 
 endGame :: String -> IO ()

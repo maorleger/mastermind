@@ -8,11 +8,11 @@ import Data.Maybe (isJust)
 import CodeBuilder
 import Data.Monoid ((<>))
 
+genInitialCFG :: IO CFG
+genInitialCFG = CodeBuilder.makeCode >>= (\code -> return $ CFG code (AnswerResult 0 0))
+
 startGame :: IO ()
 startGame =
-  let -- TODO: change the CFG so that AnswerResult is first, code is last.
-    genInitialCFG = CodeBuilder.makeCode >>= (\code -> return $ CFG code (AnswerResult 0 0))
-  in
     putStrLn "Hi, I'm Lily! Let's see if I can solve your puzzle" >>
     putStrLn "I'll tell you my guess, and you can tell me how I did." >>
     putStrLn "For example, you can say (3,1) for 3 black pegs and 1 white peg" >>

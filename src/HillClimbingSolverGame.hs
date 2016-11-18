@@ -64,12 +64,16 @@ genCode cfg@(CFG guess (AnswerResult blacks whites)) history attempts
       putStrLn $ "cfg: " <> show cfg
       exitFailure
   | otherwise = do
+      putStrLn $ "my CFG is " <> show cfg
+      putStrLn $ "my History is: " <> show history
       pegsToKeep <- randomPegsToKeep [] blacks
       pegsToShift <- randomPegsToShift pegsToKeep [] whites
       code <- createCode guess pegsToKeep pegsToShift
+      putStrLn $ "proposed code: " ++ show code
+      putStrLn $ "is it inconsistent? " ++ (show $ (inconsistent  code history))
       if inconsistent code history
-        then genCode cfg history (attempts + 1)
-        else return code
+        then putStrLn "not consistent" >> genCode cfg history (attempts + 1)
+        else putStrLn "returning code" >> return code
 
 
 randomPegsToKeep :: [Int] -> Int -> IO [Int]

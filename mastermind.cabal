@@ -18,8 +18,11 @@ library
                     ,  HillClimbingSolverGame
                     ,  CodeBuilder
                     ,  GameMechanics
+                    ,  WebHillClimbingApi
   build-depends:       base >= 4.7 && < 5
                     ,  random
+                    ,  aeson
+                    , scotty
   default-language:    Haskell2010
 
 executable mastermind

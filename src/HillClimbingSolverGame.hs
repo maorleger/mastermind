@@ -8,11 +8,11 @@ import Data.Maybe (isJust)
 import CodeBuilder
 import Data.Monoid ((<>))
 
+genInitialCFG :: IO CFG
+genInitialCFG = CodeBuilder.makeCode >>= (\code -> return $ CFG code (AnswerResult 0 0))
+
 startGame :: IO ()
 startGame =
-  let -- TODO: change the CFG so that AnswerResult is first, code is last.
-    genInitialCFG = CodeBuilder.makeCode >>= (\code -> return $ CFG code (AnswerResult 0 0))
-  in
     putStrLn "Hi, I'm Lily! Let's see if I can solve your puzzle" >>
     putStrLn "I'll tell you my guess, and you can tell me how I did." >>
     putStrLn "For example, you can say (3,1) for 3 black pegs and 1 white peg" >>
@@ -64,12 +64,16 @@ genCode cfg@(CFG guess (AnswerResult blacks whites)) history attempts
       putStrLn $ "cfg: " <> show cfg
       exitFailure
   | otherwise = do
+      putStrLn $ "my CFG is " <> show cfg
+      putStrLn $ "my History is: " <> show history
       pegsToKeep <- randomPegsToKeep [] blacks
       pegsToShift <- randomPegsToShift pegsToKeep [] whites
       code <- createCode guess pegsToKeep pegsToShift
+      putStrLn $ "proposed code: " ++ show code
+      putStrLn $ "is it inconsistent? " ++ (show $ (inconsistent  code history))
       if inconsistent code history
-        then genCode cfg history (attempts + 1)
-        else return code
+        then putStrLn "not consistent" >> genCode cfg history (attempts + 1)
+        else putStrLn "returning code" >> return code
 
 
 randomPegsToKeep :: [Int] -> Int -> IO [Int]

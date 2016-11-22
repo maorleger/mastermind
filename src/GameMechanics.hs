@@ -1,9 +1,12 @@
+{-# LANGUAGE DeriveGeneric #-}
 module GameMechanics where
 
 import Data.List (delete)
 import CodeBuilder
 import System.Exit (exitSuccess)
 import Data.Monoid (mappend, (<>))
+import Data.Aeson (ToJSON, FromJSON)
+import GHC.Generics (Generic)
 
 numRounds :: Int
 numRounds = 10
@@ -16,10 +19,14 @@ type Answer = [Peg]
 data AnswerResult = AnswerResult {
   blackPegs :: Int,
   whitePegs :: Int
-} deriving (Eq)
+} deriving (Eq, Generic)
+
+instance ToJSON AnswerResult
+instance FromJSON AnswerResult
 
 -- Current Favorite Guess
 data CFG = CFG Guess AnswerResult deriving (Eq, Show)
+
 
 instance Ord AnswerResult where
   compare result result' = compare (computeScore result) (computeScore result')

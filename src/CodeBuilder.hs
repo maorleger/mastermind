@@ -1,7 +1,10 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module CodeBuilder where
 
 import System.Random
-
+import Data.Aeson (FromJSON, ToJSON)
+import GHC.Generics
 
 data Peg =
     Blue
@@ -10,8 +13,11 @@ data Peg =
   | Yellow
   | Orange
   | Pink
-  deriving (Eq, Show, Ord, Enum)
+  deriving (Eq, Show, Ord, Enum, Generic)
 
+
+instance ToJSON Peg
+instance FromJSON Peg
 
 instance Random Peg where
     random g = case randomR (0,5) g of

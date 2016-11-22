@@ -3,9 +3,11 @@ module WebHillClimbingApi where
 
 import Data.Aeson (FromJSON, ToJSON)
 import GHC.Generics
-import GameMechanics
 import CodeBuilder
 import HillClimbingSolverGame ( genCode )
+import Web.Scotty
+import GameMechanics
+import Control.Monad.IO.Class (liftIO)
 
 data ApiCFG = ApiCFG {guess :: Guess, score :: Maybe (Int, Int)} deriving (Eq, Show, Generic)
 
@@ -38,3 +40,20 @@ playRound (Game game@(cfg:history)) = do
   let numRounds = length (cfg:history)
   guess <- genCode (cfgConvert cfg) (fmap cfgConvert (cfg : history)) 0
   return . Game $ ApiCFG guess Nothing : game
+
+
+startServer :: IO ()
+startServer = scotty 3000 $ do
+  get (literal "/rounds") $
+    json
+      [ApiCFG [Green, Green, Green, Green] Nothing
+      , ApiCFG [Blue, Red, Blue, Red] $ Just (0, 0)
+      , ApiCFG [Yellow, Yellow, Pink, Pink] $ Just (2, 0)
+      ]
+  post (literal "/echo") $ do
+    rounds <- jsonData :: ActionM Game
+    json rounds
+  post (literal "/play") $ do
+    rounds <- jsonData :: ActionM Game
+    game <- liftIO . playRound $ rounds
+    json game

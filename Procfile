@@ -1,1 +1,1 @@
-web: stack exec mastermind server_mode
+web: /app/.local/bin/mastermind server_mode

@@ -9,6 +9,7 @@ import Web.Scotty
 import GameMechanics
 import Control.Monad.IO.Class (liftIO)
 import System.Environment (getEnv)
+import Network.Wai.Middleware.Cors
 
 data ApiCFG = ApiCFG {guess :: Guess, score :: Maybe (Int, Int)} deriving (Eq, Show, Generic)
 
@@ -47,6 +48,7 @@ startServer :: IO ()
 startServer = do
   port <- read <$> getEnv "PORT"
   scotty port $ do
+    middleware simpleCors
     get (literal "/rounds") $
       json
         [ApiCFG [Green, Green, Green, Green] Nothing

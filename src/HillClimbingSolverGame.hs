@@ -3,7 +3,6 @@ module HillClimbingSolverGame where
 import GameMechanics
 import qualified CodeBuilder
 import System.Random
-import System.Exit (exitFailure)
 import Data.Maybe (isJust)
 import CodeBuilder
 import Data.Monoid ((<>))
@@ -62,7 +61,7 @@ genCode cfg@(CFG guess (AnswerResult blacks whites)) history attempts
       putStrLn "Cannot deduce the next guess, are you sure you scored my guesses correctly? "
       putStrLn $ "history: " <> show history
       putStrLn $ "cfg: " <> show cfg
-      exitFailure
+      return []
   | otherwise = do
       putStrLn $ "my CFG is " <> show cfg
       putStrLn $ "my History is: " <> show history

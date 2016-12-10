@@ -24,6 +24,7 @@ library
                     ,  aeson
                     ,  scotty
                     ,  wai-cors
+                    ,  mtl
   default-language:    Haskell2010
 
 executable mastermind

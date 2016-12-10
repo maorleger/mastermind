@@ -1,0 +1,169 @@
+.header {
+  text-align: center;
+  font-family: "Roboto","Helvetica","Arial",sans-serif;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -.04em;
+  color: #757575;
+}
+
+.mount {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+}
+
+.board {
+  padding: 30px;
+  box-shadow:0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rounds {
+  display: flex;
+  flex-direction: column-reverse;
+
+}
+
+.round {
+  border: 1px solid lightgrey;
+  margin-bottom: 10px;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.black__peg {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  margin: 10px;
+  display: inline-block;
+  background-color: black;
+}
+
+.white__peg {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  margin: 10px;
+  display: inline-block;
+  border: 1px solid black;
+  background-color: white;
+}
+
+
+.round__peg {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin: 10px;
+  display: inline-block;
+}
+
+.round__peg--blue {
+  background-color: blue;
+}
+
+.round__peg--pink {
+  background-color: pink;
+}
+
+.round__peg--yellow {
+  background-color: yellow;
+}
+
+.round__peg--orange {
+  background-color: orange;
+}
+
+.round__peg--green {
+  background-color: green;
+}
+
+.round__peg--red {
+  background-color: red;
+}
+
+.round__score .form-group {
+  padding: 10px;
+}
+
+.round__score input {
+  margin-left: 10px;
+}
+
+.round__pegs {
+  display: inline-block;
+}
+
+.round__score {
+  display: inline-block;
+}
+
+.score {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.score__input {
+  display: flex;
+  align-items: baseline;
+  width: 30%;
+}
+
+.score__submit {
+  display: flex;
+  justify-content: center;
+}
+
+.score__submit--button {
+    width: 100%;
+    text-decoration: none;
+    color: #fff;
+    background-color: #26a69a;
+    text-align: center;
+    letter-spacing: .5px;
+    transition: .2s ease-out;
+    cursor: pointer;
+    border: none;
+    border-radius: 2px;
+    display: inline-block;
+    height: 36px;
+    line-height: 36px;
+    padding: 0 2rem;
+    text-transform: uppercase;
+    vertical-align: middle;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+}
+
+.result__message {
+  padding-bottom: 10px;
+}
+
+.score__input input {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #9e9e9e;
+    border-radius: 0;
+    outline: none;
+    width: 100%;
+    font-size: 1rem;
+    margin: 0 0 20px 0;
+    padding: 0;
+    box-shadow: none;
+    box-sizing: content-box;
+    transition: all 0.3s;
+}
+
+label {
+  font-size: 0.8rem;
+  color: #9e9e9e;
+}

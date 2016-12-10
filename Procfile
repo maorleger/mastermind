@@ -1,1 +1,1 @@
-web: /app/.local/bin/mastermind server_mode
+web: .local/bin/mastermind server_mode

@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
-    "summary": "Example using `elm-webpack-loader`.",
-    "repository": "https://github.com/moarwick/elm-webpack-starter.git",
+    "summary": "Mastetmind in Elm.",
+    "repository": "https://github.com/maorleger/mastermind.git",
     "license": "MIT",
     "source-directories": [
         "src/elm"

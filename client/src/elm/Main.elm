@@ -159,12 +159,10 @@ update msg model =
 submitScore : Model -> Cmd Msg
 submitScore { rounds, blackPegs, whitePegs } =
     let
-        url =
-            "https://mastermind-haskell.herokuapp.com/play"
-
-        --"http://localhost:3000/play"
+        server_url =
+            "https://play-mastermind.herokuapp.com/play"
     in
-        Task.perform FailedRounds GotRounds (Http.post decodeRounds url <| encodeRounds rounds)
+        Task.perform FailedRounds GotRounds (Http.post decodeRounds server_url <| encodeRounds rounds)
 
 
 

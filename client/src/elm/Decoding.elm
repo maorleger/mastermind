@@ -1,10 +1,10 @@
 module Decoding exposing (encodeRounds, decodeRounds)
 
 import Json.Encode as Encode
-import Json.Decode as Decode exposing ((:=))
+import Json.Decode as Decode
 import Json.Decode.Extra as Decode exposing ((|:))
 import Models exposing (..)
-import Http exposing (string)
+import Http
 
 
 -- ENCODING
@@ -17,11 +17,10 @@ pegToString =
 
 encodeRounds : List Round -> Http.Body
 encodeRounds rounds =
-    Encode.object
-        [ ( "rounds", Encode.list <| List.map encodeRound rounds )
-        ]
-        |> Encode.encode 0
-        |> Http.string
+    Http.jsonBody <|
+        Encode.object
+            [ ( "rounds", Encode.list <| List.map encodeRound rounds )
+            ]
 
 
 encodeRound : Round -> Encode.Value
@@ -35,7 +34,7 @@ encodeRound record =
                 Just ( black, white ) ->
                     [ black, white ]
     in
-        Encode.object
+        Encode.object <|
             [ ( "guess", Encode.list <| List.map pegToString <| record.guess )
             , ( "score", Encode.list <| List.map Encode.int <| toScore record.score )
             ]
@@ -72,16 +71,16 @@ stringToPeg peg =
 
 decodeRounds : Decode.Decoder (List Round)
 decodeRounds =
-    ("rounds" := Decode.list gameRound)
+    (Decode.field "rounds" <| Decode.list gameRound)
 
 
 gameRound : Decode.Decoder Round
 gameRound =
     Decode.succeed Round
-        |: ("guess" := Decode.list decodePeg)
-        |: ("score" := (Decode.maybeNull <| Decode.tuple2 (,) Decode.int Decode.int))
+        |: (Decode.field "guess" <| Decode.list decodePeg)
+        |: (Decode.field "score" <| (Decode.nullable <| Decode.map2 (,) (Decode.index 0 Decode.int) (Decode.index 1 Decode.int)))
 
 
 decodePeg : Decode.Decoder Peg
 decodePeg =
-    Decode.andThen Decode.string stringToPeg
+    Decode.andThen stringToPeg <| Decode.string

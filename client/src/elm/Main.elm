@@ -2,11 +2,9 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.App as Html
 import Html.Events exposing (onClick, onInput)
 import String exposing (toLower)
 import Http
-import Task
 import Models exposing (..)
 import Decoding exposing (encodeRounds, decodeRounds)
 
@@ -14,7 +12,7 @@ import Decoding exposing (encodeRounds, decodeRounds)
 -- APP
 
 
-main : Program Never
+main : Program Never Model Msg
 main =
     Html.program
         { init = init
@@ -41,9 +39,12 @@ init =
     let
         model =
             Model [] Nothing Nothing None
+
+        submitScoreCmd =
+            Http.send SubmitScoreResponse (submitScore model)
     in
         ( model
-        , submitScore model
+        , submitScoreCmd
         )
 
 
@@ -64,7 +65,7 @@ gameOver : List Round -> GameOver
 gameOver rounds =
     let
         winRound { guess, score } =
-            Maybe.withDefault False (Maybe.map (fst >> ((==) 4)) score)
+            Maybe.withDefault False (Maybe.map (Tuple.first >> ((==) 4)) score)
 
         loseRound { guess, score } =
             if List.length rounds > 7 || List.isEmpty guess then
@@ -87,6 +88,7 @@ type Msg
     = NoOp
     | GotRounds (List Round)
     | FailedRounds Http.Error
+    | SubmitScoreResponse (Result Http.Error (List Round))
     | SubmitScore ( Maybe Int, Maybe Int )
     | ChangeBlack String
     | ChangeWhite String
@@ -116,7 +118,7 @@ update msg model =
                     else
                         Nothing
             in
-                flip Maybe.andThen scoreInRange
+                Maybe.andThen scoreInRange
     in
         case msg of
             NoOp ->
@@ -127,6 +129,13 @@ update msg model =
 
             FailedRounds error ->
                 ( { model | gameOver = Error error }, Cmd.none )
+
+            SubmitScoreResponse (Err error) ->
+                Debug.log (toString error)
+                    ( { model | gameOver = Error error }, Cmd.none )
+
+            SubmitScoreResponse (Ok rounds) ->
+                ( Model rounds Nothing Nothing (gameOver rounds), Cmd.none )
 
             SubmitScore ( blackPegs, whitePegs ) ->
                 let
@@ -144,7 +153,11 @@ update msg model =
                     if newModel.gameOver /= None then
                         ( newModel, Cmd.none )
                     else
-                        ( newModel, submitScore newModel )
+                        let
+                            submitScoreCmd =
+                                Http.send SubmitScoreResponse <| submitScore newModel
+                        in
+                            ( newModel, submitScoreCmd )
 
             ChangeBlack blackPegs ->
                 ( { model | blackPegs = validateScore <| stringToScore blackPegs }, Cmd.none )
@@ -156,13 +169,27 @@ update msg model =
                 init
 
 
-submitScore : Model -> Cmd Msg
+getRounds : Http.Request (List Round)
+getRounds =
+    let
+        url =
+            "https://play-mastermind.herokuapp.com/rounds"
+    in
+        Http.get url decodeRounds
+
+
+submitScore : Model -> Http.Request (List Round)
 submitScore { rounds, blackPegs, whitePegs } =
     let
         server_url =
             "https://play-mastermind.herokuapp.com/play"
+
+        --"http://localhost:3000/play"
     in
-        Task.perform FailedRounds GotRounds (Http.post decodeRounds server_url <| encodeRounds rounds)
+        Http.post
+            server_url
+            (encodeRounds rounds)
+            decodeRounds
 
 
 
@@ -204,11 +231,14 @@ errorView error =
                 Http.NetworkError ->
                     "Network error connecting to server..."
 
-                Http.UnexpectedPayload payload ->
-                    "Hmmm... Got a parse error. Weird..."
+                Http.BadUrl _ ->
+                    "Seems like you entered an invalid url for the server"
 
-                Http.BadResponse code response ->
-                    "Hmmm... Got a bad response from the server: " ++ response
+                Http.BadStatus _ ->
+                    "Got a bad status code from the server..."
+
+                Http.BadPayload _ _ ->
+                    "Got something back from the server, but it's not something I can parse"
     in
         gameOverView errorText
 

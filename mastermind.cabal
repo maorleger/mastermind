@@ -26,6 +26,8 @@ library
                     ,  wai-cors
                     ,  mtl
                     ,  wai-middleware-static
+                    ,  wai-extra
+                    ,  http-types
   default-language:    Haskell2010
 
 executable mastermind

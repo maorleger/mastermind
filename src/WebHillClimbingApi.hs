@@ -11,6 +11,9 @@ import Control.Monad.IO.Class (liftIO)
 import System.Environment (getEnv)
 import Network.Wai.Middleware.Cors
 import Network.Wai.Middleware.Static
+import Network.Wai.Middleware.RequestLogger
+import Network.HTTP.Types.Method
+
 
 data ApiCFG = ApiCFG {guess :: Guess, score :: Maybe (Int, Int)} deriving (Eq, Show, Generic)
 
@@ -45,23 +48,42 @@ playRound (Game game@(cfg:history)) = do
   return . Game $ ApiCFG guess Nothing : game
 
 
+
+mastermindCors = cors $ const (Just mastermindResourcePolicy)
+
+
+mastermindResourcePolicy :: CorsResourcePolicy
+mastermindResourcePolicy =
+  CorsResourcePolicy
+      { corsOrigins = Nothing
+      , corsMethods = []
+      , corsRequestHeaders = simpleHeaders -- adds "Content-Type" to defaults
+      , corsExposedHeaders = Nothing
+      , corsMaxAge = Nothing
+      , corsVaryOrigin = False
+      , corsRequireOrigin = False
+      , corsIgnoreFailures = False
+      }
+
 startServer :: IO ()
-startServer = do
-  port <- read <$> getEnv "PORT"
-  scotty port $ do
-    middleware simpleCors
-    middleware $ staticPolicy $ addBase "/app/client/dist"
-    get (literal "/") $ file "/app/client/dist/index.html"
-    get (literal "/rounds") $
-      json
-        [ApiCFG [Green, Green, Green, Green] Nothing
-        , ApiCFG [Blue, Red, Blue, Red] $ Just (0, 0)
-        , ApiCFG [Yellow, Yellow, Pink, Pink] $ Just (2, 0)
-        ]
-    post (literal "/echo") $ do
-      rounds <- jsonData :: ActionM Game
-      json rounds
-    post (literal "/play") $ do
-      rounds <- jsonData :: ActionM Game
-      game <- liftIO . playRound $ rounds
-      json game
+startServer =
+  do
+    port <- read <$> getEnv "PORT"
+    scotty port $ do
+      middleware mastermindCors
+      middleware . staticPolicy $ addBase "/app/client/dist"
+      middleware logStdoutDev
+      get (literal "/") $ file "/app/client/dist/index.html"
+      get (literal "/rounds") $
+        json
+          [ApiCFG [Green, Green, Green, Green] Nothing
+          , ApiCFG [Blue, Red, Blue, Red] $ Just (0, 0)
+          , ApiCFG [Yellow, Yellow, Pink, Pink] $ Just (2, 0)
+          ]
+      post (literal "/echo") $ do
+        rounds <- jsonData :: ActionM Game
+        json rounds
+      post (literal "/play") $ do
+        rounds <- jsonData :: ActionM Game
+        game <- liftIO . playRound $ rounds
+        json game

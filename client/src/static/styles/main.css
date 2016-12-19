@@ -167,3 +167,23 @@ label {
   font-size: 0.8rem;
   color: #9e9e9e;
 }
+
+.info {
+  width: 60%;
+  margin: 0 auto;
+  text-align: justify;
+  text-justify: inter-word;
+  color: #3E3B3B;
+}
+
+.info p {
+  font-family: "Roboto","Helvetica","Arial",sans-serif;
+  color: #757575;
+}
+
+.info__colors {
+  text-align: center;
+  font-size: 140%;
+  font-family: "Roboto","Helvetica","Arial",sans-serif;
+  font-weight: bold;
+}

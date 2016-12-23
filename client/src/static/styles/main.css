@@ -10,21 +10,34 @@ body {
   background: linear-gradient(to bottom, #000000 0%,#222 100%);
   background: url(/static/img/bg.jpg);
   background-size: cover;
-  background-attachment: fixed;
+  background-position: center center;
+  background-attachment: initial;
   font-size: 16px;
   font-family: "Roboto","Helvetica","Arial",sans-serif;
 }
 
+@media (min-width: 376px) {
+  body {
+    background-attachment: fixed;
+  }
+}
 .header {
   font-weight: 300;
   color: #af975c;
-  font-size: 100px;
+  font-size: 40px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  margin-bottom: 0px;
+  margin-bottom: 20px;
   transform: perspective(300px) rotateX(25deg);
   text-shadow: 3px 3px #592a1a;
+}
+
+@media (min-width: 850px) {
+  .header {
+    font-size: 100px;
+    margin-bottom: 0px;
+  }
 }
 
 .header span:first-child {
@@ -44,6 +57,7 @@ body {
   justify-content: center;
   font-family: "Roboto","Helvetica","Arial",sans-serif;
   position: relative;
+  margin-bottom: 100px;
 }
 
 .game {
@@ -63,13 +77,24 @@ body {
   padding: 30px;
 }
 
+.intro__pegs {
+  width: 150px;
+  margin: auto;
+}
+
+@media (min-width: 390px) {
+  .intro__pegs {
+    width: auto;
+  }
+}
+
 .board {
   background: #7c402c;
   background: linear-gradient(to right, #471908 0%,#5f2f1f 20%,#5f2f1f 80%,#471908 100%);
   padding: 30px;
   box-shadow: 0px 10px 150px -10px #7c402c;
   border: 2px solid #2D1005;
-  width: 350px;
+  max-width: 350px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -78,7 +103,6 @@ body {
   transform: perspective(615px) rotateX(0deg) translateZ(0px);
   transform-origin: center;
   margin: auto;
-  margin-bottom: 100px;
 }
 
 .three-d {
@@ -88,6 +112,14 @@ body {
   color: #5f2f1f;
   text-decoration: none;
   font-size: 10px;
+  display: none;
+  cursor: pointer;
+}
+
+@media (min-width: 850px) {
+  .three-d {
+    display: block;
+  }
 }
 
 .board--3d {
@@ -96,11 +128,17 @@ body {
 
 .board:after {
   content: "";
-  display: block;
+  display: none;
   width: 412px;
   height: 30px;
   background: #2D1005;
   transform: rotateX(-90deg) translateZ(47px) translateY(15px);
+}
+
+@media (min-width: 850px) {
+  .board:after {
+    display: block;
+  }
 }
 
 .rounds {
@@ -177,13 +215,6 @@ body {
   background: radial-gradient(ellipse at 50% 40%, pink 0%, red 20%, black 100%);
 }
 
-.round__score .form-group {
-  padding: 10px;
-}
-
-.round__score input {
-  margin-left: 10px;
-}
 
 .round__pegs {
   display: inline-block;
@@ -221,7 +252,7 @@ body {
 
 .score-note {
   text-align: center;
-  width: 330px;
+  max-width: 330px;
   padding: 20px;
   background: #af865c;
   color: #333;
@@ -260,6 +291,29 @@ body {
   font-size: 1.1rem;
   margin-left: 10px;
   padding: 3px;
+  display: none;
+}
+
+.score__value {
+  width: 1.5em;
+  background-color: rgba(0,0,0,0.1);
+  border: none;
+  border-radius: 0;
+  outline: none;
+  font-size: 1.1rem;
+  margin-left: 10px;
+  padding: 3px;
+  display: block;
+}
+
+@media (min-width: 376px) {
+  .score__input input {
+    display: block;
+  }
+
+  .score__value {
+    display: none;
+  }
 }
 
 .score__submit {
@@ -284,7 +338,7 @@ body {
 
 .other {
   width: 100%;
-  margin: 120px 0px 20px 0px;
+  margin: 0px 0px 20px 0px;
   display: flex;
   justify-content: center;
 }

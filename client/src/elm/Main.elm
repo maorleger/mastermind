@@ -218,7 +218,7 @@ view { showIntro, rounds, blackPegs, whitePegs, gameOver, threeDMode, thinking }
                 [ div [ classList [ ("board", True), ("board--3d", threeDMode) ] ]
                     [ div [ class "rounds" ] <| List.map roundView rounds
                     , div [ class "score-note" ] [ scoreView thinking blackPegs whitePegs gameOver ]
-                    , a [ class "three-d", href "javascript:void(0)", onClick Toggle3D ] [ text <| if threeDMode then "2D" else "3D" ]
+                    , span [ class "three-d", onClick Toggle3D ] [ text <| if threeDMode then "2D" else "3D" ]
                     ]
                 ]
 
@@ -304,6 +304,7 @@ scoreFormView blackPegs whitePegs =
                         , class "score__peg score__peg--black"
                         , onClick IncBlack
                         ] []
+                , span [ class "score__value" ] [ text <| toString blackPegs ]
                 , input [ class "score__input--black"
                         , id "black-pegs"
                         , Html.Attributes.max "4"
@@ -319,6 +320,7 @@ scoreFormView blackPegs whitePegs =
                         , class "score__peg score__peg--white"
                         , onClick IncWhite
                         ] []
+                , span [ class "score__value" ] [ text <| toString whitePegs ]
                 , input [ class "score__input--white"
                         ,id "white-pegs"
                         , Html.Attributes.max "4"

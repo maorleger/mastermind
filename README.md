@@ -7,7 +7,7 @@
 3. Web Server: This mode is the backend server for my [Elm Fronend](https://github.com/maorleger/elm-mastermind)
 
 ## Live Demo
-http://play-mastermind.herokuapp.com/
+http://haskellmind.herokuapp.com/
 
 ## Usage
 1. Install Haskell Stack

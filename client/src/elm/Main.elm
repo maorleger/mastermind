@@ -27,7 +27,7 @@ main =
 
 
 type alias Model =
-    { showIntro: Bool
+    { showIntro : Bool
     , rounds : List Round
     , blackPegs : Int
     , whitePegs : Int
@@ -129,7 +129,7 @@ update msg model =
             NoOp ->
                 ( model, Cmd.none )
 
-            Begin -> 
+            Begin ->
                 ( { model | showIntro = False }, Cmd.none )
 
             GotRounds rounds ->
@@ -157,11 +157,11 @@ update msg model =
 
                     newModel =
                         { model
-                        | blackPegs = 0
-                        , whitePegs = 0
-                        , rounds = updatedRounds
-                        , gameOver = gameOver updatedRounds
-                        , thinking = True
+                            | blackPegs = 0
+                            , whitePegs = 0
+                            , rounds = updatedRounds
+                            , gameOver = gameOver updatedRounds
+                            , thinking = True
                         }
                 in
                     if newModel.gameOver /= None then
@@ -180,10 +180,10 @@ update msg model =
                 ( { model | whitePegs = parseScore whitePegs model.whitePegs model.blackPegs }, Cmd.none )
 
             IncBlack ->
-                ( { model | blackPegs = parseScore ( toString <| ( model.blackPegs + 1 ) % 5 ) model.blackPegs model.whitePegs }, Cmd.none )
+                ( { model | blackPegs = parseScore (toString <| (model.blackPegs + 1) % 5) model.blackPegs model.whitePegs }, Cmd.none )
 
             IncWhite ->
-                ( { model | whitePegs = parseScore ( toString <| ( model.whitePegs + 1 ) % 5 ) model.whitePegs model.blackPegs }, Cmd.none )
+                ( { model | whitePegs = parseScore (toString <| (model.whitePegs + 1) % 5) model.whitePegs model.blackPegs }, Cmd.none )
 
             NewGame ->
                 init
@@ -196,7 +196,7 @@ submitScore : Model -> Http.Request (List Round)
 submitScore { rounds, blackPegs, whitePegs } =
     let
         server_url =
-            "https://play-mastermind.herokuapp.com/play"
+            "https://haskellmind.herokuapp.com/play"
 
         --"http://localhost:3000/play"
     in
@@ -215,14 +215,20 @@ view { showIntro, rounds, blackPegs, whitePegs, gameOver, threeDMode, thinking }
     let
         board =
             div [ class "game" ]
-                [ div [ classList [ ("board", True), ("board--3d", threeDMode) ] ]
+                [ div [ classList [ ( "board", True ), ( "board--3d", threeDMode ) ] ]
                     [ div [ class "rounds" ] <| List.map roundView rounds
                     , div [ class "score-note" ] [ scoreView thinking blackPegs whitePegs gameOver ]
-                    , span [ class "three-d", onClick Toggle3D ] [ text <| if threeDMode then "2D" else "3D" ]
+                    , span [ class "three-d", onClick Toggle3D ]
+                        [ text <|
+                            if threeDMode then
+                                "2D"
+                            else
+                                "3D"
+                        ]
                     ]
                 ]
 
-        intro = 
+        intro =
             div [ class "intro" ]
                 [ div [ class "intro__pegs" ]
                     [ span [ class <| "round__peg round__peg--blue" ] []
@@ -237,9 +243,11 @@ view { showIntro, rounds, blackPegs, whitePegs, gameOver, threeDMode, thinking }
                 , p [] [ text "Ready to play?" ]
                 , button [ class "score__submit", onClick Begin ] [ text "Begin" ]
                 ]
-
     in
-        if showIntro then intro else board
+        if showIntro then
+            intro
+        else
+            board
 
 
 scoreView : Bool -> Int -> Int -> GameOver -> Html Msg
@@ -286,54 +294,62 @@ errorView error =
 
 gameOverView : String -> Bool -> Html Msg
 gameOverView msg showButton =
-    div [ class "results" ]
-        <| h3 [ class "result__message" ] [ text msg ]
-        :: if showButton then
-            [ div [ class "results__action" ] [ button [ class "score__submit", onClick NewGame ] [ text "Play Again?" ] ] ]
-                else
-            []
+    div [ class "results" ] <|
+        h3 [ class "result__message" ] [ text msg ]
+            :: if showButton then
+                [ div [ class "results__action" ] [ button [ class "score__submit", onClick NewGame ] [ text "Play Again?" ] ] ]
+               else
+                []
 
 
 scoreFormView : Int -> Int -> Html Msg
 scoreFormView blackPegs whitePegs =
     Html.form [ class "form", onSubmit <| SubmitScore ]
-        [ h3 [] [text "Here's my guess.  How did I do?"]
+        [ h3 [] [ text "Here's my guess.  How did I do?" ]
         , div [ class "score" ]
             [ div [ class "score__input" ]
-                [ label [ for "black-pegs"
-                        , class "score__peg score__peg--black"
-                        , onClick IncBlack
-                        ] []
+                [ label
+                    [ for "black-pegs"
+                    , class "score__peg score__peg--black"
+                    , onClick IncBlack
+                    ]
+                    []
                 , span [ class "score__value" ] [ text <| toString blackPegs ]
-                , input [ class "score__input--black"
-                        , id "black-pegs"
-                        , Html.Attributes.max "4"
-                        , Html.Attributes.min "0"
-                        , type_ "number"
-                        , autofocus True
-                        , value <| toString blackPegs
-                        , onInput ChangeBlack
-                        ] []
+                , input
+                    [ class "score__input--black"
+                    , id "black-pegs"
+                    , Html.Attributes.max "4"
+                    , Html.Attributes.min "0"
+                    , type_ "number"
+                    , autofocus True
+                    , value <| toString blackPegs
+                    , onInput ChangeBlack
+                    ]
+                    []
                 ]
             , div [ class "score__input" ]
-                [ label [ for "white-pegs"
-                        , class "score__peg score__peg--white"
-                        , onClick IncWhite
-                        ] []
+                [ label
+                    [ for "white-pegs"
+                    , class "score__peg score__peg--white"
+                    , onClick IncWhite
+                    ]
+                    []
                 , span [ class "score__value" ] [ text <| toString whitePegs ]
-                , input [ class "score__input--white"
-                        ,id "white-pegs"
-                        , Html.Attributes.max "4"
-                        , Html.Attributes.min "0"
-                        , type_ "number"
-                        , value <| toString whitePegs
-                        , onInput ChangeWhite
-                        ] []
+                , input
+                    [ class "score__input--white"
+                    , id "white-pegs"
+                    , Html.Attributes.max "4"
+                    , Html.Attributes.min "0"
+                    , type_ "number"
+                    , value <| toString whitePegs
+                    , onInput ChangeWhite
+                    ]
+                    []
                 ]
             ]
         , button [ class "score__submit", type_ "submit" ] [ text "Score!" ]
-        , p [] [text "(Black pegs = number of right color, right place)" ]
-        , p [] [text "(White pegs = number of right color, wrong place)" ]
+        , p [] [ text "(Black pegs = number of right color, right place)" ]
+        , p [] [ text "(White pegs = number of right color, wrong place)" ]
         ]
 
 
@@ -349,15 +365,16 @@ roundView { guess, score } =
     in
         div [ class "round" ]
             [ div [ class "round__pegs" ] <| List.map pegView guess
-            , div [ class "round__score" ]
-                <| Maybe.withDefault []
-                <| Maybe.map
-                (\(black, white) ->
-                    [ div [ class "score__peg score__peg--black" ] [ text <| toString <| black ]
-                    , div [ class "score__peg score__peg--white" ] [ text <| toString <| white ]
-                    ]
-                )
-                <| score
+            , div [ class "round__score" ] <|
+                Maybe.withDefault [] <|
+                    Maybe.map
+                        (\( black, white ) ->
+                            [ div [ class "score__peg score__peg--black" ] [ text <| toString <| black ]
+                            , div [ class "score__peg score__peg--white" ] [ text <| toString <| white ]
+                            ]
+                        )
+                    <|
+                        score
             ]
 
 

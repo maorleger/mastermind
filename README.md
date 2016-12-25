@@ -1,4 +1,6 @@
-# A Haskell implementation of Mastermind
+# HaskellMind
+
+# A Haskell and Elm implementation of Mastermind
 
 ## This game emulates a game of [Mastermind](https://en.wikipedia.org/wiki/Mastermind_(board_game)) with three different modes:
 
@@ -13,7 +15,7 @@ http://haskellmind.herokuapp.com/
 1. Install Haskell Stack
 2. run `stack build && PORT=3000 stack exec mastermind [ARG]` where ARG can be one of:
   1. `hill_climbing` -> for the hill climbing console mode
-  2. `server_mode` -> for the hill climbing server mode. 
+  2. `server_mode` -> for the hill climbing server mode.
     1. For this mode you'll need to set the PORT environment variable.
   3. Or if left blank it will default to the human solver mode
 

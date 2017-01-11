@@ -12,7 +12,7 @@ genInitialCFG = CodeBuilder.makeCode >>= (\code -> return $ CFG code (AnswerResu
 
 startGame :: IO ()
 startGame =
-    putStrLn "Hi, I'm Lily! Let's see if I can solve your puzzle" >>
+    putStrLn "Hi, I'd love to play a game of MasterMind with you!" >>
     putStrLn "I'll tell you my guess, and you can tell me how I did." >>
     putStrLn "For example, you can say (3,1) for 3 black pegs and 1 white peg" >>
     genInitialCFG >>=
